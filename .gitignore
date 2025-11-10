@@ -1,0 +1,16 @@
+# Terraform local state and cache
+.terraform/
+.terraform.lock.hcl
+
+# Terraform local files
+*.tfstate
+*.tfstate.backup
+
+# Crash logs
+crash.log
+*.tfvars
+*.tfvars.json
+
+# Do NOT commit local binaries
+terraform-provider-aws_v5.100.0_x5.exe
+terraform
