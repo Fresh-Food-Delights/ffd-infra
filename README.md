@@ -20,21 +20,22 @@ Resource - Purpose
 
 ## Repository Structure
 
-ffd-infra/  
-├── README.md  
-├── backend.hcl                 (S3 + DynamoDB backend configuration)  
-├── providers.tf                (AWS provider configuration and version pinning)  
-├── .gitignore                  (Prevents `.terraform` and local state files from being committed)  
+ffd-infra/
+├── README.md
+├── backend.hcl                 (S3 + DynamoDB backend configuration)
+├── providers.tf                (AWS provider configuration + version pin)
+├── .gitignore                  (Prevents `.terraform` and local state files from being committed)
 │
-├── policies/                   (AWS bucket and access control policies)  
-│   ├── tfstate-policy.json  
-│   ├── art-policy.json  
-│   ├── logs-policy.json  
-│   ├── pab.json                (Public Access Block configuration)  
-│   ├── ownership.json          (BucketOwnerPreferred object ownership rule)  
-│   └── sse.json                (Default SSE-S3 encryption rule)  
+├── policies/                   (AWS bucket access & security configuration)
+│   ├── artifacts-policy.json   (S3 access policy for artifacts bucket)
+│   ├── logs-policy.json        (S3 access policy for logs bucket)
+│   ├── tfstate-policy.json     (S3 access policy for Terraform state bucket)
+│   │
+│   ├── public-block.json       (Bucket-level public access block configuration)
+│   ├── ownership.json          (BucketOwnerPreferred object ownership rule)
+│   └── sse.json                (Default SSE-S3 encryption configuration rule)
 │
-└── modules/                    (Reusable Terraform modules to be added as the architecture expands)
+└── modules/                    (Reusable Terraform modules — will be populated in later units)
 
 ## Terraform Workflow
 
