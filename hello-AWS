@@ -1,4 +1,0 @@
-# main.tf (root) — minimal to start; replace with VPC etc. in Units 5–7
-resource "aws_s3_bucket" "artifacts" {
-  bucket = "ffd-artifacts-771402395766-us-east-1"
-}

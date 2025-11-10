@@ -12,18 +12,5 @@
       ],
       "Condition": { "Bool": { "aws:SecureTransport": "false" } }
     },
-    {
-      "Sid": "LimitToAccount",
-      "Effect": "Deny",
-      "Principal": "*",
-      "Action": "s3:*",
-      "Resource": [
-        "arn:aws:s3:::ffd-logs-771402395766-us-east-1",
-        "arn:aws:s3:::ffd-logs-771402395766-us-east-1/*"
-      ],
-      "Condition": {
-        "StringNotEquals": { "aws:PrincipalAccount": "771402395766" }
-      }
-    }
   ]
 }
