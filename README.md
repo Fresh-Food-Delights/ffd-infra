@@ -20,6 +20,7 @@ Resource - Purpose
 
 ## Repository Structure
 
+```
 ffd-infra/
 ├── README.md
 ├── backend.hcl                 (S3 + DynamoDB backend configuration)
@@ -36,6 +37,7 @@ ffd-infra/
 │   └── sse.json                (Default SSE-S3 encryption configuration rule)
 │
 └── modules/                    (Reusable Terraform modules — will be populated in later units)
+```
 
 ## Terraform Workflow
 
