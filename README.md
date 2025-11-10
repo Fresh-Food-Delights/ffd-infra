@@ -22,21 +22,33 @@ Resource - Purpose
 
 ```
 ffd-infra/
-├── README.md
-├── backend.hcl                 (S3 + DynamoDB backend configuration)
-├── providers.tf                (AWS provider configuration + version pin)
-├── .gitignore                  (Prevents `.terraform` and local state files from being committed)
+├── README.md                       (This file)
+├── backend.hcl                     (S3 + DynamoDB backend configuration)
+├── providers.tf                    (AWS provider configuration + version pin)
+├── .gitignore                      (Prevents `.terraform` and local state files from being committed)
 │
-├── policies/                   (AWS bucket access & security configuration)
-│   ├── artifacts-policy.json   (S3 access policy for artifacts bucket)
-│   ├── logs-policy.json        (S3 access policy for logs bucket)
-│   ├── tfstate-policy.json     (S3 access policy for Terraform state bucket)
+├── envs/                           (Environment-specific Terraform entrypoints)
+│   ├── dev/                        (Development environment)
+│   │   └── main.tf                 (Will be populated in Unit 5+)
+│   ├── test/                       (Testing environment)
+│   │   └── main.tf
+│   └── prod/                       (Production environment)
+│       └── main.tf
+│
+├── policies/                       (AWS bucket access & security configuration)
+│   ├── artifacts-policy.json       (S3 access policy for artifacts bucket)
+│   ├── logs-policy.json            (S3 access policy for logs bucket)
+│   ├── tfstate-policy.json         (S3 access policy for Terraform state bucket)
 │   │
-│   ├── public-block.json       (Bucket-level public access block configuration)
-│   ├── ownership.json          (BucketOwnerPreferred object ownership rule)
-│   └── sse.json                (Default SSE-S3 encryption configuration rule)
+│   ├── public-block.json           (Bucket-level Public Access Block configuration)
+│   ├── ownership.json              (BucketOwnerPreferred object ownership rule)
+│   └── sse.json                    (Default SSE-S3 encryption configuration rule)
 │
-└── modules/                    (Reusable Terraform modules — will be populated in later units)
+├── modules/                        (Reusable Terraform modules — added as architecture expands)
+│
+└── .github/
+    └── workflows/
+        └── terraform.yml           (GitHub Actions workflow using OIDC for Terraform plan/apply)
 ```
 
 ## Terraform Workflow
