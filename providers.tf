@@ -1,6 +1,6 @@
 terraform {
   required_version = ">= 1.6"
-  backend "s3" {}  # values come from backend.hcl
+  backend "s3" {} # values come from backend.hcl
   required_providers {
     aws = {
       source  = "hashicorp/aws"
