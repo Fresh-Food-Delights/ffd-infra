@@ -23,72 +23,68 @@ Infrastructure-as-Code repository for the Fresh Food Delights mock organization.
 | VPC Endpoints       | S3, DynamoDB, Secrets Manager, SSM, etc. with least privilege            |
 | Future:             | CloudFront, WAF, GuardDuty, CloudTrail, etc. (planned for deployment)    |
 
-## Repository Structure
+## 🗂 Repository Structure
 
 ```
-ffd-infra/
-├── .github/
+FFD-INFRA/
+├── .github/             # GitHub Actions workflows
 │   └── workflows/
-│       └── terraform.yml                # GitHub Actions workflow for CI/CD
-│
-├── .terraform/                         # Local plugin/cache directory (excluded from Git)
-├── .gitignore
-├── backend.hcl                         # Global backend config for S3 + DynamoDB
-├── providers.tf                        # AWS provider version and region pinning
-├── README.md                           # This file
-│
-├── diagram/
-│   └── diagram.jpg                     # Architecture diagram (East + West VPC layout)
-│
-├── envs/
+│       └── terraform.yml
+├── diagram/             # Reference architecture visuals
+│   └── diagram.jpg
+├── envs/                # Environment-specific configuration
 │   ├── dev/
-│   │   ├── backend.hcl
-│   │   ├── main.tf
-│   │   └── variables.tf
 │   ├── test/
-│   │   ├── backend.hcl
-│   │   ├── main.tf
-│   │   └── variables.tf
 │   └── prod/
-│       ├── backend.hcl
-│       ├── variables.tf
-│       ├── us-east-1.tf
-│       └── us-west-1.tf
-│
-├── modules/
-│   ├── alb/
-│   │   ├── main.tf
-│   │   ├── outputs.tf
-│   │   └── variables.tf
-│   ├── cloudfront/                     # Placeholder for CDN edge config
-│   ├── dynamodb/                       # Placeholder for session/table-related logic
-│   ├── ec2/
-│   │   ├── main.tf
-│   │   ├── outputs.tf
-│   │   └── variables.tf
-│   ├── iam/                            # OIDC, role bindings, policies
-│   ├── rds/                            # Placeholder for PostgreSQL setup
-│   ├── s3/                             # Placeholder for static + artifact bucket logic
-│   ├── security/
-│   │   ├── main.tf
-│   │   ├── outputs.tf
-│   │   └── variables.tf
-│   ├── ssm/                            # Placeholder for patching, parameters
-│   ├── vpc/
-│   │   ├── main.tf
-│   │   ├── outputs.tf
-│   │   └── variables.tf
-│   ├── vpc_endpoints/                  # Placeholder for modular VPCe config
-│   └── waf/                            # Placeholder for WAF rule sets
-│
-├── policies/
+├── modules/             # All Terraform modules used by environments
+│   ├── alb-app/         # Private ALB targeting app tier (8443)
+│   ├── alb-web/         # Public ALB targeting web tier (443)
+│   ├── asg-app/         # App-tier Auto Scaling Group
+│   ├── asg-web/         # Web-tier Auto Scaling Group
+│   ├── ec2/             # Reusable EC2 launch configuration (free tier)
+│   ├── iam/             # IAM role/policy bindings (placeholder)
+│   ├── nat/             # AZ-mapped NAT gateways
+│   ├── rds/             # Placeholder for PostgreSQL or read replica module
+│   ├── routing/         # Route tables per subnet tier (no broad local)
+│   ├── security/        # Security groups with customizable rules
+│   ├── ssm/             # SSM session support and output for EC2 targets
+│   ├── subnet/          # Tiered subnet layout (per AZ)
+│   ├── vpc/             # Core VPC and IGW creation
+│   ├── vpc_endpoints/   # S3, DynamoDB, SSM, Secrets, KMS endpoints
+│   └── waf/             # Placeholder for AWS WAF module
+├── policies/            # S3 and IAM policy JSON files
 │   ├── artifacts-policy.json
 │   ├── logs-policy.json
 │   ├── ownership.json
 │   ├── public-block.json
 │   ├── sse.json
 │   └── tfstate-policy.json
+├── backend.hcl          # Shared backend config for remote state
+├── providers.tf         # Terraform provider configuration
+├── .gitignore
+└── README.md
 ```
+
+---
+
+## 🔧 Module Overview
+
+| Module         | Purpose                                                     |
+|----------------|-------------------------------------------------------------|
+| `alb-web`      | Public ALB for web tier (HTTPS 443)                         |
+| `alb-app`      | Internal ALB for app tier (HTTPS 8443)                      |
+| `asg-web`      | Auto Scaling Group for web-tier EC2                         |
+| `asg-app`      | Auto Scaling Group for app-tier EC2                         |
+| `ec2`          | General-purpose EC2 instance launcher                       |
+| `nat`          | One NAT gateway per AZ (disabled by default)                |
+| `routing`      | Custom route tables per subnet tier                         |
+| `security`     | Parameterized security group module                         |
+| `ssm`          | SSM activation and output capture for EC2 usage             |
+| `subnet`       | Public, private-web, private-app, and private-db subnets    |
+| `vpc`          | VPC creation and IGW                                        |
+| `vpc_endpoints`| Gateway and interface endpoints for AWS services            |
+
+---
 
 ## Usage
 
