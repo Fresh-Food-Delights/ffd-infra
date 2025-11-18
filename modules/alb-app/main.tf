@@ -9,7 +9,7 @@ resource "aws_lb" "this" {
   subnets            = var.subnet_ids
 
   enable_deletion_protection = false
-  idle_timeout                = 60
+  idle_timeout               = 60
 
   tags = {
     Name        = "ffd-${var.environment}-app-alb"

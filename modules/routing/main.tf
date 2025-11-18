@@ -2,7 +2,7 @@
 
 resource "aws_route_table" "public" {
   vpc_id = var.vpc_id
-  tags = {
+  tags   = {
     Name = "ffd-${var.environment}-public"
     Tier = "public"
   }
@@ -10,7 +10,7 @@ resource "aws_route_table" "public" {
 
 resource "aws_route_table" "private_web" {
   vpc_id = var.vpc_id
-  tags = {
+  tags   = {
     Name = "ffd-${var.environment}-private-web"
     Tier = "private-web"
   }
@@ -18,7 +18,7 @@ resource "aws_route_table" "private_web" {
 
 resource "aws_route_table" "private_app" {
   vpc_id = var.vpc_id
-  tags = {
+  tags   = {
     Name = "ffd-${var.environment}-private-app"
     Tier = "private-app"
   }
@@ -26,7 +26,7 @@ resource "aws_route_table" "private_app" {
 
 resource "aws_route_table" "private_db" {
   vpc_id = var.vpc_id
-  tags = {
+  tags   = {
     Name = "ffd-${var.environment}-private-db"
     Tier = "private-db"
   }
@@ -56,11 +56,6 @@ resource "aws_route" "web_nat" {
 #  vpc_endpoint_id        = var.vpce_s3_id
 #}
 
-resource "aws_route" "web_to_app" {
-  route_table_id         = aws_route_table.private_web.id
-  destination_cidr_block = var.app_cidr_block
-}
-
 #resource "aws_route" "web_to_ssm" {
 #  count                  = var.vpce_ssm_id != null ? 1 : 0
 #  route_table_id         = aws_route_table.private_web.id
@@ -79,17 +74,6 @@ resource "aws_route" "web_to_app" {
 #  destination_cidr_block = "ec2messages"
 #  vpc_endpoint_id        = var.vpce_ec2messages_id
 #}
-
-# Routes for Private App (to Web + DB + VPCe)
-resource "aws_route" "app_to_web" {
-  route_table_id         = aws_route_table.private_app.id
-  destination_cidr_block = var.web_cidr_block
-}
-
-resource "aws_route" "app_to_db" {
-  route_table_id         = aws_route_table.private_app.id
-  destination_cidr_block = var.db_cidr_block
-}
 
 #resource "aws_route" "app_to_s3" {
 #  count                  = var.vpce_s3_id != null ? 1 : 0
@@ -125,12 +109,6 @@ resource "aws_route" "app_to_db" {
 #  destination_cidr_block = "kms"
 #  vpc_endpoint_id        = var.vpce_kms_id
 #}
-
-# Routes for Private DB (to App + VPCe)
-resource "aws_route" "db_to_app" {
-  route_table_id         = aws_route_table.private_db.id
-  destination_cidr_block = var.app_cidr_block
-}
 
 #resource "aws_route" "db_to_s3" {
 #  count                  = var.vpce_s3_id != null ? 1 : 0

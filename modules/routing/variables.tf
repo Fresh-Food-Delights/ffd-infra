@@ -55,22 +55,6 @@ variable "private_db_subnet_ids" {
   type        = map(string)
 }
 
-# Inter-tier CIDRs
-variable "app_cidr_block" {
-  description = "CIDR block for private app tier"
-  type        = string
-}
-
-variable "web_cidr_block" {
-  description = "CIDR block for private web tier"
-  type        = string
-}
-
-variable "db_cidr_block" {
-  description = "CIDR block for private DB tier"
-  type        = string
-}
-
 # Optional VPC Endpoint IDs
 variable "vpce_s3_id" {
   description = "VPC endpoint ID for S3"
