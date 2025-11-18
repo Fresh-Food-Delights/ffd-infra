@@ -1,3 +1,5 @@
+# envs/prod/us-east-1.tf
+
 provider "aws" {
   region = "us-east-1"
 }
@@ -5,7 +7,7 @@ provider "aws" {
 module "vpc" {
   source      = "../../modules/vpc"
   environment = var.environment
-  cidr_block  = "10.0.0.0/16"
+  vpc_cidr  = "10.0.0.0/16"
 }
 
 module "subnets" {
@@ -78,6 +80,7 @@ module "alb_web" {
   security_group_ids  = [module.security_web.security_group_id]
   target_port         = 443
   health_check_path   = "/"
+  acm_cert_arn        = var.acm_cert_arn
   enable              = var.enable_alb_web
 }
 
@@ -91,16 +94,19 @@ module "alb_app" {
   security_group_ids  = [module.security_app.security_group_id]
   target_port         = 8443
   health_check_path   = "/"
+  acm_cert_arn        = var.acm_cert_arn
   enable              = var.enable_alb_app
 }
 
 module "asg_web" {
   source               = "../../modules/asg-web"
   environment          = var.environment
-  vpc_id               = module.vpc.vpc_id
   subnet_ids           = module.subnets.private_web_subnet_ids
   security_group_ids   = [module.security_web.security_group_id]
-  alb_target_group_arn = module.alb_web.target_group_arn
+  target_group_arn     = module.alb_web.target_group_arn
+  ami_id               = var.ami_id
+  instance_type        = var.instance_type
+  user_data_base64     = var.user_data_base64
   desired_capacity     = 0
   min_size             = 0
   max_size             = 0
@@ -109,10 +115,12 @@ module "asg_web" {
 module "asg_app" {
   source               = "../../modules/asg-app"
   environment          = var.environment
-  vpc_id               = module.vpc.vpc_id
   subnet_ids           = module.subnets.private_app_subnet_ids
   security_group_ids   = [module.security_app.security_group_id]
-  alb_target_group_arn = module.alb_app.target_group_arn
+  target_group_arn     = module.alb_app.target_group_arn
+  ami_id               = var.ami_id
+  instance_type        = var.instance_type
+  user_data_base64     = var.user_data_base64
   desired_capacity     = 0
   min_size             = 0
   max_size             = 0
@@ -121,13 +129,20 @@ module "asg_app" {
 module "ec2" {
   source              = "../../modules/ec2"
   environment         = var.environment
+  ami_id              = var.ami_id
+  instance_type       = var.instance_type
+  name                = "ami-builder"
   subnet_id           = module.subnets.private_web_subnet_ids["us-east-1a"]
   security_group_ids  = [module.security_web.security_group_id]
   enable              = var.enable_ec2
 }
 
 module "ssm" {
-  source      = "../../modules/ssm"
-  environment = var.environment
-  enable      = var.enable_ssm
+  source              = "../../modules/ssm"
+  environment         = var.environment
+  enable              = var.enable_ssm
+  region              = var.aws_region
+  vpc_id              = module.vpc.vpc_id
+  subnet_ids          = module.subnets.private_app_subnet_ids
+  security_group_ids  = [module.security_app.security_group_id]
 }

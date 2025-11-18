@@ -9,3 +9,9 @@ variable "public_subnet_ids" {
   description = "Map of AZs to public subnet IDs where NAT Gateways will be deployed"
   type        = map(string)
 }
+
+variable "enable" {
+  description = "Whether to enable NAT Gateway deployment"
+  type        = bool
+  default     = false
+}
