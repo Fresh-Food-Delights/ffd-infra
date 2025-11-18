@@ -4,7 +4,7 @@
 resource "aws_subnet" "public" {
   for_each = var.public_subnet_cidrs
 
-  vpc_id                  = aws_vpc.this.id
+  vpc_id                  = var.vpc_id
   cidr_block              = each.value
   availability_zone       = each.key
   map_public_ip_on_launch = true
@@ -18,7 +18,7 @@ resource "aws_subnet" "public" {
 resource "aws_subnet" "private_web" {
   for_each = var.private_web_subnet_cidrs
 
-  vpc_id            = aws_vpc.this.id
+  vpc_id            = var.vpc_id
   cidr_block        = each.value
   availability_zone = each.key
   tags = {
@@ -31,7 +31,7 @@ resource "aws_subnet" "private_web" {
 resource "aws_subnet" "private_app" {
   for_each = var.private_app_subnet_cidrs
 
-  vpc_id            = aws_vpc.this.id
+  vpc_id            = var.vpc_id
   cidr_block        = each.value
   availability_zone = each.key
   tags = {
@@ -44,7 +44,7 @@ resource "aws_subnet" "private_app" {
 resource "aws_subnet" "private_db" {
   for_each = var.private_db_subnet_cidrs
 
-  vpc_id            = aws_vpc.this.id
+  vpc_id            = var.vpc_id
   cidr_block        = each.value
   availability_zone = each.key
   tags = {
