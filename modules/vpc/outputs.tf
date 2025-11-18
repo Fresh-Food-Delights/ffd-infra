@@ -6,6 +6,6 @@ output "vpc_id" {
 }
 
 output "internet_gateway_id" {
-  value = aws_internet_gateway.this.id
+  value       = aws_internet_gateway.this.id
   description = "The ID of the Internet Gateway"
 }

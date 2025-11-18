@@ -8,7 +8,7 @@ resource "aws_subnet" "public" {
   cidr_block              = each.value
   availability_zone       = each.key
   map_public_ip_on_launch = true
-  tags = {
+  tags                    = {
     Name = "ffd-${var.environment}-public-${each.key}"
     Tier = "public"
   }
@@ -21,7 +21,7 @@ resource "aws_subnet" "private_web" {
   vpc_id            = var.vpc_id
   cidr_block        = each.value
   availability_zone = each.key
-  tags = {
+  tags              = {
     Name = "ffd-${var.environment}-web-${each.key}"
     Tier = "private-web"
   }
@@ -34,7 +34,7 @@ resource "aws_subnet" "private_app" {
   vpc_id            = var.vpc_id
   cidr_block        = each.value
   availability_zone = each.key
-  tags = {
+  tags              = {
     Name = "ffd-${var.environment}-app-${each.key}"
     Tier = "private-app"
   }
@@ -47,7 +47,7 @@ resource "aws_subnet" "private_db" {
   vpc_id            = var.vpc_id
   cidr_block        = each.value
   availability_zone = each.key
-  tags = {
+  tags              = {
     Name = "ffd-${var.environment}-db-${each.key}"
     Tier = "private-db"
   }

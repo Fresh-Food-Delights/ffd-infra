@@ -7,17 +7,17 @@ provider "aws" {
 module "vpc" {
   source      = "../../modules/vpc"
   environment = var.environment
-  vpc_cidr  = "10.1.0.0/16"
+  vpc_cidr    = "10.1.0.0/16"
 }
 
 module "subnets" {
-  source                    = "../../modules/subnet"
-  environment               = var.environment
-  vpc_id                    = module.vpc.vpc_id
-  public_subnet_cidrs       = { "us-west-1a" = "10.1.1.0/24", "us-west-1b" = "10.1.2.0/24" }
-  private_web_subnet_cidrs  = { "us-west-1a" = "10.1.11.0/24", "us-west-1b" = "10.1.12.0/24" }
-  private_app_subnet_cidrs  = { "us-west-1a" = "10.1.21.0/24", "us-west-1b" = "10.1.22.0/24" }
-  private_db_subnet_cidrs   = { "us-west-1a" = "10.1.31.0/24", "us-west-1b" = "10.1.32.0/24" }
+  source                   = "../../modules/subnet"
+  environment              = var.environment
+  vpc_id                   = module.vpc.vpc_id
+  public_subnet_cidrs      = { "us-west-1a" = "10.1.1.0/24", "us-west-1b" = "10.1.2.0/24" }
+  private_web_subnet_cidrs = { "us-west-1a" = "10.1.11.0/24", "us-west-1b" = "10.1.12.0/24" }
+  private_app_subnet_cidrs = { "us-west-1a" = "10.1.21.0/24", "us-west-1b" = "10.1.22.0/24" }
+  private_db_subnet_cidrs  = { "us-west-1a" = "10.1.31.0/24", "us-west-1b" = "10.1.32.0/24" }
 }
 
 module "nat" {
@@ -28,26 +28,23 @@ module "nat" {
 }
 
 module "routing" {
-  source                       = "../../modules/routing"
-  environment                  = var.environment
-  vpc_id                       = module.vpc.vpc_id
-  public_subnet_ids            = module.subnets.public_subnet_ids
-  private_web_subnet_ids       = module.subnets.private_web_subnet_ids
-  private_app_subnet_ids       = module.subnets.private_app_subnet_ids
-  private_db_subnet_ids        = module.subnets.private_db_subnet_ids
-  enable_nat_gateway           = var.enable_nat
-  nat_gateway_ids              = module.nat.nat_gateway_ids
-  internet_gateway_id          = module.vpc.internet_gateway_id
-  web_cidr_block               = "10.1.11.0/24"
-  app_cidr_block               = "10.1.21.0/24"
-  db_cidr_block                = "10.1.31.0/24"
-  vpce_s3_id                   = null
-  vpce_dynamodb_id             = null
-  vpce_ssm_id                  = null
-  vpce_ssmmessages_id          = null
-  vpce_ec2messages_id          = null
-  vpce_kms_id                  = null
-  vpce_secretsmanager_id       = null
+  source                 = "../../modules/routing"
+  environment            = var.environment
+  vpc_id                 = module.vpc.vpc_id
+  public_subnet_ids      = module.subnets.public_subnet_ids
+  private_web_subnet_ids = module.subnets.private_web_subnet_ids
+  private_app_subnet_ids = module.subnets.private_app_subnet_ids
+  private_db_subnet_ids  = module.subnets.private_db_subnet_ids
+  enable_nat_gateway     = var.enable_nat
+  nat_gateway_ids        = module.nat.nat_gateway_ids
+  internet_gateway_id    = module.vpc.internet_gateway_id
+#  vpce_s3_id             = null
+#  vpce_dynamodb_id       = null
+#  vpce_ssm_id            = null
+#  vpce_ssmmessages_id    = null
+#  vpce_ec2messages_id    = null
+#  vpce_kms_id            = null
+#  vpce_secretsmanager_id = null
 }
 
 module "security_web" {
@@ -56,8 +53,24 @@ module "security_web" {
   description   = "Web tier SG"
   environment   = var.environment
   vpc_id        = module.vpc.vpc_id
-  ingress_rules = []
-  egress_rules  = []
+  ingress_rules = [
+  {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow inbound HTTPS to ALB"
+  }
+]
+  egress_rules = [
+  {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all egress"
+  }
+]
 }
 
 module "security_app" {
@@ -66,83 +79,99 @@ module "security_app" {
   description   = "App tier SG"
   environment   = var.environment
   vpc_id        = module.vpc.vpc_id
-  ingress_rules = []
-  egress_rules  = []
+  ingress_rules = [
+  {
+    from_port        = 8443
+    to_port          = 8443
+    protocol         = "tcp"
+    security_groups  = [module.security_web.security_group_id]
+    description      = "Allow web tier to app tier"
+  }
+]
+  egress_rules = [
+  {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all egress"
+  }
+]
 }
 
 module "alb_web" {
-  source              = "../../modules/alb-web"
-  environment         = var.environment
-  tier                = "web"
-  internal            = false
-  vpc_id              = module.vpc.vpc_id
-  subnet_ids          = module.subnets.public_subnet_ids
-  security_group_ids  = [module.security_web.security_group_id]
-  target_port         = 443
-  health_check_path   = "/"
-  acm_cert_arn        = var.acm_cert_arn
-  enable              = var.enable_alb_web
+  source             = "../../modules/alb-web"
+  environment        = var.environment
+  tier               = "web"
+  internal           = false
+  vpc_id             = module.vpc.vpc_id
+  subnet_ids         = module.subnets.public_subnet_ids
+  security_group_ids = [module.security_web.security_group_id]
+  target_port        = 443
+  health_check_path  = "/"
+  acm_cert_arn       = var.acm_cert_arn
+  enable             = var.enable_alb_web
 }
 
 module "alb_app" {
-  source              = "../../modules/alb-app"
-  environment         = var.environment
-  tier                = "app"
-  internal            = true
-  vpc_id              = module.vpc.vpc_id
-  subnet_ids          = module.subnets.private_web_subnet_ids
-  security_group_ids  = [module.security_app.security_group_id]
-  target_port         = 8443
-  health_check_path   = "/"
-  acm_cert_arn        = var.acm_cert_arn
-  enable              = var.enable_alb_app
+  source             = "../../modules/alb-app"
+  environment        = var.environment
+  tier               = "app"
+  internal           = true
+  vpc_id             = module.vpc.vpc_id
+  subnet_ids         = module.subnets.private_web_subnet_ids
+  security_group_ids = [module.security_app.security_group_id]
+  target_port        = 8443
+  health_check_path  = "/"
+  acm_cert_arn       = var.acm_cert_arn
+  enable             = var.enable_alb_app
 }
 
 module "asg_web" {
-  source               = "../../modules/asg-web"
-  environment          = var.environment
-  subnet_ids           = module.subnets.private_web_subnet_ids
-  security_group_ids   = [module.security_web.security_group_id]
-  target_group_arn     = module.alb_web.target_group_arn
-  ami_id               = var.ami_id
-  instance_type        = var.instance_type
-  user_data_base64     = var.user_data_base64
-  desired_capacity     = 0
-  min_size             = 0
-  max_size             = 0
+  source             = "../../modules/asg-web"
+  environment        = var.environment
+  subnet_ids         = module.subnets.private_web_subnet_ids
+  security_group_ids = [module.security_web.security_group_id]
+  target_group_arn   = module.alb_web.target_group_arn
+  ami_id             = var.ami_id
+  instance_type      = var.instance_type
+  user_data_base64   = var.user_data_base64
+  desired_capacity   = 0
+  min_size           = 0
+  max_size           = 0
 }
 
 module "asg_app" {
-  source               = "../../modules/asg-app"
-  environment          = var.environment
-  subnet_ids           = module.subnets.private_app_subnet_ids
-  security_group_ids   = [module.security_app.security_group_id]
-  target_group_arn     = module.alb_app.target_group_arn
-  ami_id               = var.ami_id
-  instance_type        = var.instance_type
-  user_data_base64     = var.user_data_base64
-  desired_capacity     = 0
-  min_size             = 0
-  max_size             = 0
+  source             = "../../modules/asg-app"
+  environment        = var.environment
+  subnet_ids         = module.subnets.private_app_subnet_ids
+  security_group_ids = [module.security_app.security_group_id]
+  target_group_arn   = module.alb_app.target_group_arn
+  ami_id             = var.ami_id
+  instance_type      = var.instance_type
+  user_data_base64   = var.user_data_base64
+  desired_capacity   = 0
+  min_size           = 0
+  max_size           = 0
 }
 
 module "ec2" {
-  source              = "../../modules/ec2"
-  environment         = var.environment
-  ami_id              = var.ami_id
-  instance_type       = var.instance_type
-  name                = "ami-builder"
-  subnet_id           = module.subnets.private_web_subnet_ids["us-west-1a"]
-  security_group_ids  = [module.security_web.security_group_id]
-  enable              = var.enable_ec2
+  source             = "../../modules/ec2"
+  environment        = var.environment
+  ami_id             = var.ami_id
+  instance_type      = var.instance_type
+  name               = "ami-builder"
+  subnet_id          = module.subnets.private_web_subnet_ids["us-west-1a"]
+  security_group_ids = [module.security_web.security_group_id]
+  enable             = var.enable_ec2
 }
 
 module "ssm" {
-  source              = "../../modules/ssm"
-  environment         = var.environment
-  enable              = var.enable_ssm
-  region              = var.aws_region
-  vpc_id              = module.vpc.vpc_id
-  subnet_ids          = module.subnets.private_app_subnet_ids
-  security_group_ids  = [module.security_app.security_group_id]
+  source             = "../../modules/ssm"
+  environment        = var.environment
+  region             = var.aws_region
+  vpc_id             = module.vpc.vpc_id
+  subnet_ids         = module.subnets.private_app_subnet_ids
+  security_group_ids = [module.security_app.security_group_id]
+  enable             = var.enable_ssm  
 }

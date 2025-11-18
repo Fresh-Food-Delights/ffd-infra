@@ -5,10 +5,10 @@ resource "aws_iam_role" "ssm" {
   name  = "ffd-${var.environment}-${var.name}-ssm-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17",
+    Version   = "2012-10-17",
     Statement = [
       {
-        Effect = "Allow",
+        Effect    = "Allow",
         Principal = {
           Service = "ec2.amazonaws.com"
         },

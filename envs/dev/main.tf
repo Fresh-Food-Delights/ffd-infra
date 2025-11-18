@@ -38,16 +38,13 @@ module "routing" {
   enable_nat_gateway     = var.enable_nat
   nat_gateway_ids        = module.nat.nat_gateway_ids
   internet_gateway_id    = module.vpc.internet_gateway_id
-  web_cidr_block         = "10.0.11.0/24"
-  app_cidr_block         = "10.0.21.0/24"
-  db_cidr_block          = "10.0.31.0/24"
-  vpce_s3_id             = null
-  vpce_dynamodb_id       = null
-  vpce_ssm_id            = null
-  vpce_ssmmessages_id    = null
-  vpce_ec2messages_id    = null
-  vpce_kms_id            = null
-  vpce_secretsmanager_id = null
+#  vpce_s3_id             = null
+#  vpce_dynamodb_id       = null
+#  vpce_ssm_id            = null
+#  vpce_ssmmessages_id    = null
+#  vpce_ec2messages_id    = null
+#  vpce_kms_id            = null
+#  vpce_secretsmanager_id = null
 }
 
 module "security_web" {
@@ -56,8 +53,24 @@ module "security_web" {
   description   = "Web tier SG"
   environment   = var.environment
   vpc_id        = module.vpc.vpc_id
-  ingress_rules = []
-  egress_rules  = []
+  ingress_rules = [
+  {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow inbound HTTPS to ALB"
+  }
+]
+  egress_rules = [
+  {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all egress"
+  }
+]
 }
 
 module "security_app" {
@@ -66,8 +79,24 @@ module "security_app" {
   description   = "App tier SG"
   environment   = var.environment
   vpc_id        = module.vpc.vpc_id
-  ingress_rules = []
-  egress_rules  = []
+  ingress_rules = [
+  {
+    from_port        = 8443
+    to_port          = 8443
+    protocol         = "tcp"
+    security_groups  = [module.security_web.security_group_id]
+    description      = "Allow web tier to app tier"
+  }
+]
+  egress_rules = [
+  {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all egress"
+  }
+]
 }
 
 module "alb_web" {
@@ -140,9 +169,9 @@ module "ec2" {
 module "ssm" {
   source             = "../../modules/ssm"
   environment        = var.environment
-  enable             = var.enable_ssm
   region             = var.aws_region
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = module.subnets.private_app_subnet_ids
   security_group_ids = [module.security_app.security_group_id]
+  enable             = var.enable_ssm
 }
