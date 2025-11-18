@@ -29,3 +29,24 @@ variable "acm_cert_arn" {
   type        = string
   description = "ARN of the ACM certificate"
 }
+
+variable "internal" {
+  description = "Whether the ALB is internal or internet-facing"
+  type        = bool
+}
+
+variable "target_port" {
+  description = "Port for the target group and listener"
+  type        = number
+}
+
+variable "tier" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+}
+
+variable "enable" {
+  description = "Whether to create the web-facing ALB"
+  type        = bool
+  default     = false
+}

@@ -24,3 +24,9 @@ variable "region" {
   description = "AWS region"
   type        = string
 }
+
+variable "enable" {
+  description = "Toggle creation of SSM endpoints"
+  type        = bool
+  default     = false
+}

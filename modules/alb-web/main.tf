@@ -1,6 +1,7 @@
 # modules/alb-web/main.tf
 
 resource "aws_lb" "this" {
+  count              = var.enable ? 1 : 0
   name               = "ffd-${var.environment}-web-alb"
   internal           = false
   load_balancer_type = "application"
@@ -13,13 +14,14 @@ resource "aws_lb" "this" {
   tags = {
     Name        = "ffd-${var.environment}-web-alb"
     Environment = var.environment
-    Tier        = "web"
+    Tier        = var.tier
   }
 }
 
 resource "aws_lb_target_group" "this" {
+  count    = var.enable ? 1 : 0
   name     = "ffd-${var.environment}-web-tg"
-  port     = 443
+  port     = var.target_port
   protocol = "HTTPS"
   vpc_id   = var.vpc_id
 
@@ -36,19 +38,20 @@ resource "aws_lb_target_group" "this" {
   tags = {
     Name        = "ffd-${var.environment}-web-tg"
     Environment = var.environment
-    Tier        = "web"
+    Tier        = var.tier
   }
 }
 
 resource "aws_lb_listener" "https" {
-  load_balancer_arn = aws_lb.this.arn
-  port              = 443
+  count             = var.enable ? 1 : 0
+  load_balancer_arn = aws_lb.this[0].arn
+  port              = var.target_port
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
   certificate_arn   = var.acm_cert_arn
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.this.arn
+    target_group_arn = aws_lb_target_group.this[0].arn
   }
 }

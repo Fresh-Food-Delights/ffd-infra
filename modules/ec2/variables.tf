@@ -48,3 +48,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "enable" {
+  description = "Toggle creation of the EC2 instance"
+  type        = bool
+  default     = false
+}
