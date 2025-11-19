@@ -28,8 +28,8 @@ variable "ami_id_web" {
   description = "Map of region to AMI ID"
   type        = map(string)
   default     = {
-    "us-east-1" = "ami-0a066922240b3c3c7"
-    "us-west-1" = "ami-060416955a5b51a51"
+    "us-east-1" = "ami-0f00d706c4a80fd93"
+    "us-west-1" = "ami-0e45116a579f0029a"
   }
 }
 
@@ -37,8 +37,8 @@ variable "ami_id_app" {
   description = "Map of region to AMI ID"
   type        = map(string)
   default     = {
-    "us-east-1" = "ami-0a066922240b3c3c7"
-    "us-west-1" = "ami-060416955a5b51a51"
+    "us-east-1" = "ami-0f00d706c4a80fd93"
+    "us-west-1" = "ami-0e45116a579f0029a"
   }
 }
 
