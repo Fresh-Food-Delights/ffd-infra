@@ -33,8 +33,8 @@ variable "enable_alb_app" {
 variable "ami_ids" {
   description = "Map of region to AMI ID"
   type        = map(string)
-  default     = {
-    "us-east-1" = "ami-12345678"    
+  default = {
+    "us-east-1" = "ami-12345678"
   }
 }
 
