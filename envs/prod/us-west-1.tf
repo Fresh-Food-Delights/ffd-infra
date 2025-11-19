@@ -47,30 +47,103 @@ module "routing" {
 #  vpce_secretsmanager_id = null
 }
 
-module "security_web" {
-  source        = "../../modules/security"
-  name          = "web"
-  description   = "Web tier SG"
-  environment   = var.environment
-  vpc_id        = module.vpc.vpc_id
+module "security_alb_web" {
+  source      = "../../modules/security"
+  name        = "alb-web"
+  description = "Security group for Web tier ALB"
+  environment = var.environment
+  vpc_id      = module.vpc.vpc_id
   ingress_rules = [
-  {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow inbound HTTP to ALB"
-  }
-]
+    {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow inbound HTTP from internet"
+    },
+    {
+      from_port   = -1
+      to_port     = -1
+      protocol    = "icmp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow ICMP for diagnostics"
+    }
+  ]
   egress_rules = [
-  {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow all egress"
-  }
-]
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow all outbound"
+    }
+  ]
+}
+
+module "security_alb_app" {
+  source      = "../../modules/security"
+  name        = "alb-app"
+  description = "Security group for App tier ALB"
+  environment = var.environment
+  vpc_id      = module.vpc.vpc_id
+  ingress_rules = [
+    {
+      from_port        = 8080
+      to_port          = 8080
+      protocol         = "tcp"
+      security_groups  = [module.security_web.security_group_id]
+      description      = "Allow web tier to access app ALB"
+    },
+    {
+      from_port   = -1
+      to_port     = -1
+      protocol    = "icmp"
+      cidr_blocks = ["10.1.0.0/16"]
+      description = "Allow ICMP from internal subnets"
+    }
+  ]
+  egress_rules = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow all outbound"
+    }
+  ]
+}
+
+module "security_web" {
+  source      = "../../modules/security"
+  name        = "web"
+  description = "Web tier SG"
+  environment = var.environment
+  vpc_id      = module.vpc.vpc_id
+  ingress_rules = [
+    {
+      from_port       = 80
+      to_port         = 80
+      protocol        = "tcp"
+      security_groups = [module.security_alb_web.security_group_id]
+      description     = "Allow HTTP from ALB Web SG"
+    },
+    {
+      from_port   = -1
+      to_port     = -1
+      protocol    = "icmp"
+      cidr_blocks = ["10.1.0.0/16"]
+      description = "Allow ICMP from anywhere"
+    }
+  ]
+  egress_rules = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow all egress"
+    }
+  ]
 }
 
 module "security_app" {
@@ -80,23 +153,96 @@ module "security_app" {
   environment   = var.environment
   vpc_id        = module.vpc.vpc_id
   ingress_rules = [
-  {
-    from_port        = 8080
-    to_port          = 8080
-    protocol         = "tcp"
-    security_groups  = [module.security_web.security_group_id]
-    description      = "Allow web tier to app tier"
-  }
-]
+    {
+      from_port        = 8080
+      to_port          = 8080
+      protocol         = "tcp"
+      security_groups  = [module.security_alb_app.security_group_id]
+      description      = "Allow HTTP from ALB App SG"
+    },
+    {
+      from_port   = -1
+      to_port     = -1
+      protocol    = "icmp"
+      cidr_blocks = ["10.1.0.0/16"]
+      description = "Allow ICMP from anywhere"
+    }
+  ]
   egress_rules = [
-  {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow all egress"
-  }
-]
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow all egress"
+    }
+  ]
+}
+
+module "security_db" {
+  source      = "../../modules/security"
+  name        = "db"
+  description = "DB tier SG"
+  environment = var.environment
+  vpc_id      = module.vpc.vpc_id
+  ingress_rules = [
+    {
+      from_port   = 5432
+      to_port     = 5432
+      protocol    = "tcp"
+      security_groups = [module.security_app.security_group_id]
+      description = "Allow PostgreSQL from App tier"
+    },
+    {
+      from_port   = -1
+      to_port     = -1
+      protocol    = "icmp"
+      cidr_blocks = ["10.1.0.0/16"]
+      description = "Allow ICMP from anywhere"
+    }
+  ]
+  egress_rules = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow all egress"
+    }
+  ]
+}
+
+module "security_internal" {
+  source      = "../../modules/security"
+  name        = "internal"
+  description = "Internal access SG (e.g., VPC endpoints)"
+  environment = var.environment
+  vpc_id      = module.vpc.vpc_id
+  ingress_rules = [
+    {
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      cidr_blocks = ["10.1.0.0/16"]
+      description = "TLS from internal subnets"
+    },
+    {
+      from_port   = -1
+      to_port     = -1
+      protocol    = "icmp"
+      cidr_blocks = ["10.1.0.0/16"]
+      description = "Allow ICMP from internal subnets"
+    }
+  ]
+  egress_rules = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow all egress"
+    }
+  ]
 }
 
 module "alb_web" {
@@ -106,7 +252,7 @@ module "alb_web" {
   internal           = false
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = values(module.subnets.public_subnet_ids)
-  security_group_ids = [module.security_web.security_group_id]
+  security_group_ids = [module.security_alb_web.security_group_id]
   target_port        = 80
   health_check_path  = "/"
   enable             = var.enable_alb_web
@@ -119,7 +265,7 @@ module "alb_app" {
   internal           = true
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = values(module.subnets.private_web_subnet_ids)
-  security_group_ids = [module.security_app.security_group_id]
+  security_group_ids = [module.security_alb_app.security_group_id]
   target_port        = 8080
   health_check_path  = "/"
   enable             = var.enable_alb_app
@@ -131,7 +277,7 @@ module "asg_web" {
   subnet_ids         = values(module.subnets.private_web_subnet_ids)
   security_group_ids = [module.security_web.security_group_id]
   target_group_arn   = module.alb_web.target_group_arn
-  ami_id             = var.ami_ids["us-west-1"]
+  ami_id             = var.ami_id_web["us-west-1"]
   instance_type      = var.instance_type
   user_data_base64   = var.user_data_base64
   desired_capacity   = 0
@@ -145,7 +291,7 @@ module "asg_app" {
   subnet_ids         = values(module.subnets.private_app_subnet_ids)
   security_group_ids = [module.security_app.security_group_id]
   target_group_arn   = module.alb_app.target_group_arn
-  ami_id             = var.ami_ids["us-west-1"]
+  ami_id             = var.ami_id_app["us-west-1"]
   instance_type      = var.instance_type
   user_data_base64   = var.user_data_base64
   desired_capacity   = 0
@@ -156,7 +302,7 @@ module "asg_app" {
 module "ec2" {
   source             = "../../modules/ec2"
   environment        = var.environment
-  ami_id             = var.ami_ids["us-west-1"]
+  ami_id             = var.ami_id_web["us-west-1"]
   instance_type      = var.instance_type
   name               = "ami-builder"
   subnet_id          = module.subnets.private_web_subnet_ids["us-west-1a"]

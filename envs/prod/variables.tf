@@ -24,12 +24,21 @@ variable "enable_alb_app" {
   default     = false
 }
 
-variable "ami_ids" {
+variable "ami_id_web" {
   description = "Map of region to AMI ID"
   type        = map(string)
   default     = {
-    "us-east-1" = "ami-12345678"
-    "us-west-1" = "ami-23456789"
+    "us-east-1" = "ami-0a066922240b3c3c7"
+    "us-west-1" = "ami-060416955a5b51a51"
+  }
+}
+
+variable "ami_id_app" {
+  description = "Map of region to AMI ID"
+  type        = map(string)
+  default     = {
+    "us-east-1" = "ami-0a066922240b3c3c7"
+    "us-west-1" = "ami-060416955a5b51a51"
   }
 }
 
