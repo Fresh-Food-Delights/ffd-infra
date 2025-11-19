@@ -30,9 +30,12 @@ variable "enable_alb_app" {
   default     = false
 }
 
-variable "ami_id" {
-  description = "AMI ID to use for instances"
-  type        = string
+variable "ami_ids" {
+  description = "Map of region to AMI ID"
+  type        = map(string)
+  default     = {
+    "us-east-1" = "ami-12345678"    
+  }
 }
 
 variable "instance_type" {
