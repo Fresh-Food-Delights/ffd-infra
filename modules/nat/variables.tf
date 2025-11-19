@@ -6,8 +6,8 @@ variable "environment" {
 }
 
 variable "public_subnet_ids" {
-  description = "List of AZs to public subnet IDs where NAT Gateways will be deployed"
-  type        = list(string)
+  description = "Map of AZs to public subnet IDs where NAT Gateways will be deployed"
+  type        = map(string)
 }
 
 variable "enable" {
