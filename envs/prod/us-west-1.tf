@@ -156,7 +156,7 @@ module "asg_app" {
 module "ec2" {
   source             = "../../modules/ec2"
   environment        = var.environment
-  ami_id             = var.ami_id
+  ami_id             = "ami-12345678"
   instance_type      = var.instance_type
   name               = "ami-builder"
   subnet_id          = module.subnets.private_web_subnet_ids["us-west-1a"]
