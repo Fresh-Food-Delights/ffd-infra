@@ -13,7 +13,6 @@ variable "environment" {
 variable "ami_id" {
   description = "AMI ID to use for the instance"
   type        = string
-  default     = "ami-12345678" # Dummy placeholder, never used if EC2/ASGs are disabled
 }
 
 variable "instance_type" {
