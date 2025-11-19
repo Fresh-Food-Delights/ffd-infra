@@ -30,7 +30,7 @@ resource "aws_autoscaling_group" "this" {
   vpc_zone_identifier       = var.subnet_ids
   health_check_type         = "EC2"
   health_check_grace_period = 30
-  target_group_arns         = [var.target_group_arn]
+  target_group_arns = var.target_group_arn != null ? [var.target_group_arn] : []
 
   launch_template {
     id      = aws_launch_template.this.id

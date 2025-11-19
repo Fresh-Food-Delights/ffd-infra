@@ -8,6 +8,7 @@ variable "environment" {
 variable "ami_id" {
   type        = string
   description = "AMI ID for launch template"
+  default     = "ami-12345678" # Dummy placeholder, never used if EC2/ASGs are disabled
 }
 
 variable "instance_type" {
