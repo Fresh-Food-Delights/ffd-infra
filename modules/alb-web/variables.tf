@@ -25,11 +25,6 @@ variable "health_check_path" {
   description = "Path for ALB health check"
 }
 
-variable "acm_cert_arn" {
-  type        = string
-  description = "ARN of the ACM certificate"
-}
-
 variable "internal" {
   description = "Whether the ALB is internal or internet-facing"
   type        = bool

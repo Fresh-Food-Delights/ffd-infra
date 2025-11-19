@@ -55,11 +55,11 @@ module "security_web" {
   vpc_id        = module.vpc.vpc_id
   ingress_rules = [
   {
-    from_port   = 443
-    to_port     = 443
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow inbound HTTPS to ALB"
+    description = "Allow inbound HTTP to ALB"
   }
 ]
   egress_rules = [
@@ -81,8 +81,8 @@ module "security_app" {
   vpc_id        = module.vpc.vpc_id
   ingress_rules = [
   {
-    from_port        = 8443
-    to_port          = 8443
+    from_port        = 8080
+    to_port          = 8080
     protocol         = "tcp"
     security_groups  = [module.security_web.security_group_id]
     description      = "Allow web tier to app tier"
@@ -107,9 +107,8 @@ module "alb_web" {
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = module.subnets.public_subnet_ids
   security_group_ids = [module.security_web.security_group_id]
-  target_port        = 443
+  target_port        = 80
   health_check_path  = "/"
-  acm_cert_arn       = var.acm_cert_arn
   enable             = var.enable_alb_web
 }
 
@@ -121,9 +120,8 @@ module "alb_app" {
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = module.subnets.private_web_subnet_ids
   security_group_ids = [module.security_app.security_group_id]
-  target_port        = 8443
+  target_port        = 8080
   health_check_path  = "/"
-  acm_cert_arn       = var.acm_cert_arn
   enable             = var.enable_alb_app
 }
 
@@ -169,7 +167,7 @@ module "ec2" {
 module "ssm" {
   source             = "../../modules/ssm"
   environment        = var.environment
-  region             = var.aws_region
+  region             = "us-east-1"
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = module.subnets.private_app_subnet_ids
   security_group_ids = [module.security_app.security_group_id]
