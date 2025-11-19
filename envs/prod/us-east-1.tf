@@ -159,7 +159,7 @@ module "ec2" {
   ami_id             = var.ami_id
   instance_type      = var.instance_type
   name               = "ami-builder"
-  subnet_id          = module.subnets.private_web_subnet_ids["us-east-1a"]
+  subnet_id          = module.subnets.private_web_subnet_ids[0]
   security_group_ids = [module.security_web.security_group_id]
   enable             = var.enable_ec2
 }
