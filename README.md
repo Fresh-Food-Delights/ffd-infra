@@ -37,8 +37,8 @@ FFD-INFRA/
 │   ├── test/
 │   └── prod/
 ├── modules/             # All Terraform modules used by environments
-│   ├── alb-app/         # Private ALB targeting app tier (8443)
-│   ├── alb-web/         # Public ALB targeting web tier (443)
+│   ├── alb-app/         # Private ALB targeting app tier (8080)
+│   ├── alb-web/         # Public ALB targeting web tier (80)
 │   ├── asg-app/         # App-tier Auto Scaling Group
 │   ├── asg-web/         # Web-tier Auto Scaling Group
 │   ├── ec2/             # Reusable EC2 launch configuration (free tier)
@@ -71,8 +71,8 @@ FFD-INFRA/
 
 | Module         | Purpose                                                     |
 |----------------|-------------------------------------------------------------|
-| `alb-web`      | Public ALB for web tier (HTTPS 443)                         |
-| `alb-app`      | Internal ALB for app tier (HTTPS 8443)                      |
+| `alb-web`      | Public ALB for web tier (HTTP 80)                           |
+| `alb-app`      | Internal ALB for app tier (HTTP 8080)                       |
 | `asg-web`      | Auto Scaling Group for web-tier EC2                         |
 | `asg-app`      | Auto Scaling Group for app-tier EC2                         |
 | `ec2`          | General-purpose EC2 instance launcher                       |
