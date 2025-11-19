@@ -105,7 +105,7 @@ module "alb_web" {
   tier               = "web"
   internal           = false
   vpc_id             = module.vpc.vpc_id
-  subnet_ids         = module.subnets.public_subnet_ids
+  subnet_ids         = values(module.subnets.public_subnet_ids)
   security_group_ids = [module.security_web.security_group_id]
   target_port        = 80
   health_check_path  = "/"
@@ -118,7 +118,7 @@ module "alb_app" {
   tier               = "app"
   internal           = true
   vpc_id             = module.vpc.vpc_id
-  subnet_ids         = module.subnets.private_web_subnet_ids
+  subnet_ids         = values(module.subnets.private_web_subnet_ids)
   security_group_ids = [module.security_app.security_group_id]
   target_port        = 8080
   health_check_path  = "/"
@@ -128,10 +128,10 @@ module "alb_app" {
 module "asg_web" {
   source             = "../../modules/asg-web"
   environment        = var.environment
-  subnet_ids         = module.subnets.private_web_subnet_ids
+  subnet_ids         = values(module.subnets.private_web_subnet_ids)
   security_group_ids = [module.security_web.security_group_id]
   target_group_arn   = module.alb_web.target_group_arn
-  ami_id             = var.ami_id
+  ami_id             = var.ami_ids["us-east-1"]
   instance_type      = var.instance_type
   user_data_base64   = var.user_data_base64
   desired_capacity   = 0
@@ -142,10 +142,10 @@ module "asg_web" {
 module "asg_app" {
   source             = "../../modules/asg-app"
   environment        = var.environment
-  subnet_ids         = module.subnets.private_app_subnet_ids
+  subnet_ids         = values(module.subnets.private_app_subnet_ids)
   security_group_ids = [module.security_app.security_group_id]
   target_group_arn   = module.alb_app.target_group_arn
-  ami_id             = var.ami_id
+  ami_id             = var.ami_ids["us-east-1"]
   instance_type      = var.instance_type
   user_data_base64   = var.user_data_base64
   desired_capacity   = 0
@@ -156,10 +156,10 @@ module "asg_app" {
 module "ec2" {
   source             = "../../modules/ec2"
   environment        = var.environment
-  ami_id             = "ami-12345678"
+  ami_id             = var.ami_ids["us-east-1"]
   instance_type      = var.instance_type
   name               = "ami-builder"
-  subnet_id          = module.subnets.private_web_subnet_ids[0]
+  subnet_id          = module.subnets.private_web_subnet_ids["us-east-1a"]
   security_group_ids = [module.security_web.security_group_id]
   enable             = var.enable_ec2
 }
@@ -169,7 +169,7 @@ module "ssm" {
   environment        = var.environment
   region             = "us-east-1"
   vpc_id             = module.vpc.vpc_id
-  subnet_ids         = module.subnets.private_app_subnet_ids
+  subnet_ids         = values(module.subnets.private_app_subnet_ids)
   security_group_ids = [module.security_app.security_group_id]
   enable             = var.enable_ssm  
 }
