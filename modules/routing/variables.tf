@@ -36,23 +36,23 @@ variable "nat_gateway_ids" {
 
 # Subnet-to-Route Table Associations
 variable "public_subnet_ids" {
-  description = "List of public subnet IDs per AZ"
-  type        = list(string)
+  description = "Map of public subnet IDs per AZ"
+  type        = map(string)
 }
 
 variable "private_web_subnet_ids" {
-  description = "List of private web subnet IDs per AZ"
-  type        = list(string)
+  description = "Map of private web subnet IDs per AZ"
+  type        = map(string)
 }
 
 variable "private_app_subnet_ids" {
-  description = "List of private app subnet IDs per AZ"
-  type        = list(string)
+  description = "Map of private app subnet IDs per AZ"
+  type        = map(string)
 }
 
 variable "private_db_subnet_ids" {
-  description = "List of private db subnet IDs per AZ"
-  type        = list(string)
+  description = "Map of private db subnet IDs per AZ"
+  type        = map(string)
 }
 
 # Optional VPC Endpoint IDs

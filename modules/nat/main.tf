@@ -3,7 +3,7 @@
 resource "aws_eip" "this" {
   for_each = var.enable ? var.public_subnet_ids : {}
   domain   = "vpc"
-  tags     = {
+  tags = {
     Name = "ffd-${var.environment}-nat-eip-${each.key}"
   }
 }
