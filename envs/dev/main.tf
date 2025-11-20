@@ -319,3 +319,21 @@ module "ssm" {
   security_group_ids = [module.security_app.security_group_id]
   enable             = var.enable_ssm
 }
+   # Integration of the S3 Baseline (using your new module)
+   module "app_s3_bucket" {
+     source = "../modules/s3"
+     # Creates a unique bucket name using variables defined in envs/dev/variables.tf
+     bucket_name = "unit-6-app-data-${var.region}-${var.environment}"
+     environment = var.environment
+   }
+
+   # Integration of the RDS Baseline (for Tyler to use)
+   module "app_database" {
+     source              = "../modules/rds"
+     db_instance_class   = "db.t3.micro"  # Using a small size for dev
+     allocated_storage    = 20              # 20 GB of storage
+   }
+
+   # VPC and subnet variables may be required here if they are outputs from other modules
+   # vpc_id = module.vpc.vpc_id
+   # subnets = module.vpc.database_subnets
