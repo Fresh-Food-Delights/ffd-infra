@@ -38,13 +38,13 @@ module "routing" {
   enable_nat_gateway     = var.enable_nat
   nat_gateway_ids        = module.nat.nat_gateway_ids
   internet_gateway_id    = module.vpc.internet_gateway_id
-#  vpce_s3_id             = null
-#  vpce_dynamodb_id       = null
-#  vpce_ssm_id            = null
-#  vpce_ssmmessages_id    = null
-#  vpce_ec2messages_id    = null
-#  vpce_kms_id            = null
-#  vpce_secretsmanager_id = null
+  #  vpce_s3_id             = null
+  #  vpce_dynamodb_id       = null
+  #  vpce_ssm_id            = null
+  #  vpce_ssmmessages_id    = null
+  #  vpce_ec2messages_id    = null
+  #  vpce_kms_id            = null
+  #  vpce_secretsmanager_id = null
 }
 
 module "security_alb_web" {
@@ -88,11 +88,11 @@ module "security_alb_app" {
   vpc_id      = module.vpc.vpc_id
   ingress_rules = [
     {
-      from_port        = 8080
-      to_port          = 8080
-      protocol         = "tcp"
-      security_groups  = [module.security_web.security_group_id]
-      description      = "Allow web tier to access app ALB"
+      from_port       = 8080
+      to_port         = 8080
+      protocol        = "tcp"
+      security_groups = [module.security_web.security_group_id]
+      description     = "Allow web tier to access app ALB"
     },
     {
       from_port   = -1
@@ -147,18 +147,18 @@ module "security_web" {
 }
 
 module "security_app" {
-  source        = "../../../modules/security"
-  name          = "app"
-  description   = "App tier SG"
-  environment   = var.environment
-  vpc_id        = module.vpc.vpc_id
+  source      = "../../../modules/security"
+  name        = "app"
+  description = "App tier SG"
+  environment = var.environment
+  vpc_id      = module.vpc.vpc_id
   ingress_rules = [
     {
-      from_port        = 8080
-      to_port          = 8080
-      protocol         = "tcp"
-      security_groups  = [module.security_alb_app.security_group_id]
-      description      = "Allow HTTP from ALB App SG"
+      from_port       = 8080
+      to_port         = 8080
+      protocol        = "tcp"
+      security_groups = [module.security_alb_app.security_group_id]
+      description     = "Allow HTTP from ALB App SG"
     },
     {
       from_port   = -1
@@ -187,11 +187,11 @@ module "security_db" {
   vpc_id      = module.vpc.vpc_id
   ingress_rules = [
     {
-      from_port   = 5432
-      to_port     = 5432
-      protocol    = "tcp"
+      from_port       = 5432
+      to_port         = 5432
+      protocol        = "tcp"
       security_groups = [module.security_app.security_group_id]
-      description = "Allow PostgreSQL from App tier"
+      description     = "Allow PostgreSQL from App tier"
     },
     {
       from_port   = -1
@@ -317,5 +317,5 @@ module "ssm" {
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = values(module.subnets.private_app_subnet_ids)
   security_group_ids = [module.security_app.security_group_id]
-  enable             = var.enable_ssm  
+  enable             = var.enable_ssm
 }
