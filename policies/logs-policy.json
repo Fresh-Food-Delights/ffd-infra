@@ -11,6 +11,6 @@
         "arn:aws:s3:::ffd-logs-771402395766-us-east-1/*"
       ],
       "Condition": { "Bool": { "aws:SecureTransport": "false" } }
-    },
+    }
   ]
 }
