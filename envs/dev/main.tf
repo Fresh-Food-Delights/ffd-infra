@@ -3,6 +3,17 @@
 provider "aws" {
   region = var.region
 }
+module "iam" {
+  source         = "../../modules/iam"
+  project_prefix = var.project_prefix
+  environment    = var.environment
+}
+
+module "waf" {
+  source         = "../../modules/waf"
+  project_prefix = var.project_prefix
+  environment    = var.environment
+}
 
 module "vpc" {
   source      = "../../modules/vpc"

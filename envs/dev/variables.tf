@@ -69,3 +69,8 @@ variable "enable_ssm" {
   type        = bool
   default     = false
 }
+
+variable "project_prefix" {
+  type        = string
+  default     = "unit6"
+}
