@@ -1,5 +1,11 @@
 # envs/prod/variables.tf
 
+variable "region" {
+  type        = string
+  description = "AWS region to deploy resources into"
+  default     = "us-east-1"
+}
+
 variable "environment" {
   type        = string
   description = "Environment name (dev, test, prod)"
