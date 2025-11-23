@@ -334,6 +334,6 @@ module "app_s3_bucket" {
   bucket_name = "ffd-app-data-${var.environment}-7714022395766-${var.region}"
 }
 resource "aws_s3_bucket_policy" "web_bucket_policy" {
-    bucket = module.web_s3_bucket.bucket_name
-    policy = file("path/to/web-bucket-policy.json")  # Update the path to your policy file
+  bucket = module.web_s3_bucket.bucket_name
+  policy = file("path/to/web-bucket-policy.json") # Update the path to your policy file
 }
