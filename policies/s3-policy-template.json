@@ -1,0 +1,33 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "DenyInsecureTransport",
+            "Effect": "Deny",
+            "Principal": "*",
+            "Action": "s3:*",
+            "Resource": [
+                "arn:aws:s3:::dev-bucket-us-east-1",
+                "arn:aws:s3:::dev-bucket-us-east-1/*",
+                "arn:aws:s3:::dev-bucket-us-west-1",  // New entry for US West
+                "arn:aws:s3:::dev-bucket-us-west-1/*" // New entry for US West
+            ],
+            "Condition": { "Bool": { "aws:SecureTransport": "false" } }
+        },
+        {
+            "Sid": "LimitToAccount",
+            "Effect": "Deny",
+            "Principal": "*",
+            "Action": "s3:*",
+            "Resource": [
+                "arn:aws:s3:::dev-bucket-us-east-1",
+                "arn:aws:s3:::dev-bucket-us-east-1/*",
+                "arn:aws:s3:::dev-bucket-us-west-1",  // New entry for US West
+                "arn:aws:s3:::dev-bucket-us-west-1/*" // New entry for US West
+            ],
+            "Condition": {
+                "StringNotEquals": { "aws:PrincipalAccount": "your-account-id" }
+            }
+        }
+    ]
+}

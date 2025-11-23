@@ -1,34 +1,34 @@
-# envs/test/main.tf
+# envs/dev/us-east-1/main.tf
 
 provider "aws" {
   region = var.region
 }
 
 module "vpc" {
-  source      = "../../modules/vpc"
+  source      = "../../../modules/vpc"
   environment = var.environment
   vpc_cidr    = "10.0.0.0/16"
 }
 
 module "subnets" {
-  source                   = "../../modules/subnet"
+  source                   = "../../../modules/subnet"
   environment              = var.environment
   vpc_id                   = module.vpc.vpc_id
-  public_subnet_cidrs      = { "us-east-1a" = "10.0.1.0/24", "us-east-1b" = "10.0.2.0/24" }
-  private_web_subnet_cidrs = { "us-east-1a" = "10.0.11.0/24", "us-east-1b" = "10.0.12.0/24" }
-  private_app_subnet_cidrs = { "us-east-1a" = "10.0.21.0/24", "us-east-1b" = "10.0.22.0/24" }
-  private_db_subnet_cidrs  = { "us-east-1a" = "10.0.31.0/24", "us-east-1b" = "10.0.32.0/24" }
+  public_subnet_cidrs      = { "${var.region}a" = "10.0.1.0/24", "${var.region}b" = "10.0.2.0/24" }
+  private_web_subnet_cidrs = { "${var.region}a" = "10.0.11.0/24", "${var.region}b" = "10.0.12.0/24" }
+  private_app_subnet_cidrs = { "${var.region}a" = "10.0.21.0/24", "${var.region}b" = "10.0.22.0/24" }
+  private_db_subnet_cidrs  = { "${var.region}a" = "10.0.31.0/24", "${var.region}b" = "10.0.32.0/24" }
 }
 
 module "nat" {
-  source            = "../../modules/nat"
+  source            = "../../../modules/nat"
   environment       = var.environment
   public_subnet_ids = module.subnets.public_subnet_ids
   enable            = var.enable_nat
 }
 
 module "routing" {
-  source                 = "../../modules/routing"
+  source                 = "../../../modules/routing"
   environment            = var.environment
   vpc_id                 = module.vpc.vpc_id
   public_subnet_ids      = module.subnets.public_subnet_ids
@@ -48,7 +48,7 @@ module "routing" {
 }
 
 module "security_alb_web" {
-  source      = "../../modules/security"
+  source      = "../../../modules/security"
   name        = "alb-web"
   description = "Security group for Web tier ALB"
   environment = var.environment
@@ -81,7 +81,7 @@ module "security_alb_web" {
 }
 
 module "security_alb_app" {
-  source      = "../../modules/security"
+  source      = "../../../modules/security"
   name        = "alb-app"
   description = "Security group for App tier ALB"
   environment = var.environment
@@ -114,7 +114,7 @@ module "security_alb_app" {
 }
 
 module "security_web" {
-  source      = "../../modules/security"
+  source      = "../../../modules/security"
   name        = "web"
   description = "Web tier SG"
   environment = var.environment
@@ -147,7 +147,7 @@ module "security_web" {
 }
 
 module "security_app" {
-  source      = "../../modules/security"
+  source      = "../../../modules/security"
   name        = "app"
   description = "App tier SG"
   environment = var.environment
@@ -180,7 +180,7 @@ module "security_app" {
 }
 
 module "security_db" {
-  source      = "../../modules/security"
+  source      = "../../../modules/security"
   name        = "db"
   description = "DB tier SG"
   environment = var.environment
@@ -213,7 +213,7 @@ module "security_db" {
 }
 
 module "security_internal" {
-  source      = "../../modules/security"
+  source      = "../../../modules/security"
   name        = "internal"
   description = "Internal access SG (e.g., VPC endpoints)"
   environment = var.environment
@@ -246,7 +246,7 @@ module "security_internal" {
 }
 
 module "alb_web" {
-  source             = "../../modules/alb-web"
+  source             = "../../../modules/alb-web"
   environment        = var.environment
   tier               = "web"
   internal           = false
@@ -259,7 +259,7 @@ module "alb_web" {
 }
 
 module "alb_app" {
-  source             = "../../modules/alb-app"
+  source             = "../../../modules/alb-app"
   environment        = var.environment
   tier               = "app"
   internal           = true
@@ -272,13 +272,13 @@ module "alb_app" {
 }
 
 module "asg_web" {
-  source             = "../../modules/asg-web"
+  source             = "../../../modules/asg-web"
   environment        = var.environment
   subnet_ids         = values(module.subnets.private_web_subnet_ids)
   security_group_ids = [module.security_web.security_group_id]
   target_group_arn   = module.alb_web.target_group_arn
-  ami_id             = var.ami_id_web["us-east-1"]
-  instance_type      = var.instance_type
+  ami_id             = var.ami_id_web["${var.region}"]
+  instance_type      = var.web_instance_type
   user_data_base64   = var.user_data_base64
   desired_capacity   = 0
   min_size           = 0
@@ -286,13 +286,13 @@ module "asg_web" {
 }
 
 module "asg_app" {
-  source             = "../../modules/asg-app"
+  source             = "../../../modules/asg-app"
   environment        = var.environment
   subnet_ids         = values(module.subnets.private_app_subnet_ids)
   security_group_ids = [module.security_app.security_group_id]
   target_group_arn   = module.alb_app.target_group_arn
-  ami_id             = var.ami_id_app["us-east-1"]
-  instance_type      = var.instance_type
+  ami_id             = var.ami_id_app["${var.region}"]
+  instance_type      = var.app_instance_type
   user_data_base64   = var.user_data_base64
   desired_capacity   = 0
   min_size           = 0
@@ -300,10 +300,10 @@ module "asg_app" {
 }
 
 module "ec2" {
-  source             = "../../modules/ec2"
+  source             = "../../../modules/ec2"
   environment        = var.environment
-  ami_id             = var.ami_id_web["us-east-1"]
-  instance_type      = var.instance_type
+  ami_id             = var.ami_id_web["${var.region}"]
+  instance_type      = var.ec2_instance_type
   name               = "ami-builder"
   subnet_id          = module.subnets.private_web_subnet_ids["us-east-1a"]
   security_group_ids = [module.security_web.security_group_id]
@@ -311,11 +311,25 @@ module "ec2" {
 }
 
 module "ssm" {
-  source             = "../../modules/ssm"
+  source             = "../../../modules/ssm"
   environment        = var.environment
   region             = var.region
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = values(module.subnets.private_app_subnet_ids)
   security_group_ids = [module.security_app.security_group_id]
   enable             = var.enable_ssm
+}
+
+module "web_s3_bucket" {
+  source      = "../../../modules/s3"
+  environment = var.environment
+  region      = var.region
+  bucket_name = "ffd-web-data-${var.environment}-7714022395766-${var.region}"
+}
+
+module "app_s3_bucket" {
+  source      = "../../../modules/s3"
+  environment = var.environment
+  region      = var.region
+  bucket_name = "ffd-app-data-${var.environment}-7714022395766-${var.region}"
 }
