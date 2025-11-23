@@ -12,12 +12,6 @@ variable "environment" {
   default     = "test"
 }
 
-variable "modules" {
-  description = "Repo modules folder"
-  type        = string
-  default     = "../../../modules"
-}
-
 variable "enable_nat" {
   description = "Toggle NAT Gateway creation"
   type        = bool
