@@ -42,7 +42,25 @@ variable "ami_id_app" {
   }
 }
 
-variable "instance_type" {
+variable "web_instance_type" {
+  description = "Instance type for ASG EC2 instances"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "app_instance_type" {
+  description = "Instance type for ASG EC2 instances"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "ec2_instance_type" {
+  description = "Instance type for ASG EC2 instances"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "db_instance_type" {
   description = "Instance type for ASG EC2 instances"
   type        = string
   default     = "t3.micro"

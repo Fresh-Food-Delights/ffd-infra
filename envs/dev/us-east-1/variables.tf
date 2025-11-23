@@ -1,4 +1,4 @@
-# envs/test/variables.tf
+# envs/dev/us-east-1/variables.tf
 
 variable "region" {
   type        = string
@@ -9,7 +9,7 @@ variable "region" {
 variable "environment" {
   type        = string
   description = "Environment name (dev, test, prod)"
-  default     = "test"
+  default     = "dev"
 }
 
 variable "enable_nat" {
@@ -46,7 +46,25 @@ variable "ami_id_app" {
   }
 }
 
-variable "instance_type" {
+variable "web_instance_type" {
+  description = "Instance type for ASG EC2 instances"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "app_instance_type" {
+  description = "Instance type for ASG EC2 instances"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "ec2_instance_type" {
+  description = "Instance type for ASG EC2 instances"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "db_instance_type" {
   description = "Instance type for ASG EC2 instances"
   type        = string
   default     = "t3.micro"

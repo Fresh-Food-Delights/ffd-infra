@@ -278,7 +278,7 @@ module "asg_web" {
   security_group_ids = [module.security_web.security_group_id]
   target_group_arn   = module.alb_web.target_group_arn
   ami_id             = var.ami_id_web["us-east-1"]
-  instance_type      = var.instance_type
+  instance_type      = var.web_instance_type
   user_data_base64   = var.user_data_base64
   desired_capacity   = 0
   min_size           = 0
@@ -292,7 +292,7 @@ module "asg_app" {
   security_group_ids = [module.security_app.security_group_id]
   target_group_arn   = module.alb_app.target_group_arn
   ami_id             = var.ami_id_app["us-east-1"]
-  instance_type      = var.instance_type
+  instance_type      = var.app_instance_type
   user_data_base64   = var.user_data_base64
   desired_capacity   = 0
   min_size           = 0
@@ -303,7 +303,7 @@ module "ec2" {
   source             = "../../../modules/ec2"
   environment        = var.environment
   ami_id             = var.ami_id_web["us-east-1"]
-  instance_type      = var.instance_type
+  instance_type      = var.ec2_instance_type
   name               = "ami-builder"
   subnet_id          = module.subnets.private_web_subnet_ids["us-east-1a"]
   security_group_ids = [module.security_web.security_group_id]
@@ -318,4 +318,18 @@ module "ssm" {
   subnet_ids         = values(module.subnets.private_app_subnet_ids)
   security_group_ids = [module.security_app.security_group_id]
   enable             = var.enable_ssm
+}
+
+module "web_s3_bucket" {
+  source      = "../../modules/s3"
+  environment = var.environment
+  region = var.region
+  bucket_name = "ffd-web-data-${var.environment}-7714022395766-${var.region}"
+}
+
+module "app_s3_bucket" {
+  source      = "../../modules/s3"
+  environment = var.environment
+  region = var.region
+  bucket_name = "ffd-app-data-${var.environment}-7714022395766-${var.region}"
 }
