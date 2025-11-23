@@ -1,4 +1,4 @@
-# envs/prod/us-east-1.tf
+# envs/prod/us-east-1/main.tf
 
 provider "aws" {
   region = var.region
@@ -14,10 +14,10 @@ module "subnets" {
   source                   = "../../../modules/subnet"
   environment              = var.environment
   vpc_id                   = module.vpc.vpc_id
-  public_subnet_cidrs      = { "us-east-1a" = "10.0.1.0/24", "us-east-1b" = "10.0.2.0/24" }
-  private_web_subnet_cidrs = { "us-east-1a" = "10.0.11.0/24", "us-east-1b" = "10.0.12.0/24" }
-  private_app_subnet_cidrs = { "us-east-1a" = "10.0.21.0/24", "us-east-1b" = "10.0.22.0/24" }
-  private_db_subnet_cidrs  = { "us-east-1a" = "10.0.31.0/24", "us-east-1b" = "10.0.32.0/24" }
+  public_subnet_cidrs      = { "${var.region}a" = "10.0.1.0/24", "${var.region}b" = "10.0.2.0/24" }
+  private_web_subnet_cidrs = { "${var.region}a" = "10.0.11.0/24", "${var.region}b" = "10.0.12.0/24" }
+  private_app_subnet_cidrs = { "${var.region}a" = "10.0.21.0/24", "${var.region}b" = "10.0.22.0/24" }
+  private_db_subnet_cidrs  = { "${var.region}a" = "10.0.31.0/24", "${var.region}b" = "10.0.32.0/24" }
 }
 
 module "nat" {
