@@ -1,14 +1,10 @@
-   resource "aws_s3_bucket" "this" {
-     bucket = var.bucket_name
-     acl    = "private"
+# modules/s3/main.tf
 
-     tags = {
-       Name        = var.bucket_name
-       Environment = var.environment
-     }
-   }
+resource "aws_s3_bucket" "this" {
+ bucket = var.bucket_name
 
-   output "s3_bucket_id" {
-     description = "The name/ID of the S3 bucket."
-     value       = aws_s3_bucket.this.id
-   }
+  tags = {
+   Name        = var.bucket_name
+   Environment = var.environment
+  }
+}

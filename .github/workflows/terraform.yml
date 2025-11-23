@@ -19,8 +19,8 @@ jobs:
     strategy:
       matrix:
         env_path:
-          - envs/dev
-          - envs/test
+          - envs/dev/us-east-1
+          - envs/test/us-east-1
           - envs/prod/us-east-1
           - envs/prod/us-west-1
 
