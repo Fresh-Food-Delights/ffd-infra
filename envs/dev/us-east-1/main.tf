@@ -27,6 +27,11 @@ module "nat" {
   enable            = var.enable_nat
 }
 
+module "iam" {
+  source      = "../../../modules/iam"
+  environment = var.environment
+}
+
 module "routing" {
   source                 = "../../../modules/routing"
   environment            = var.environment

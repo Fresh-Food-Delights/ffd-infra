@@ -333,4 +333,3 @@ module "app_s3_bucket" {
   region      = var.region
   bucket_name = "ffd-app-data-${var.environment}-7714022395766-${var.region}"
 }
-
