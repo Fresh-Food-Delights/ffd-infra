@@ -1,12 +1,8 @@
-   resource "aws_s3_bucket" "this" {
-     bucket = var.bucket_name
-     acl    = "private"
+# modules/s3/main.tf
 
-     tags = {
-       Name        = var.bucket_name
-       Environment = var.environment
-     }
-   }
+provider "aws" {
+  region = "us-east-1"  # or your chosen region
+}
 
    output "s3_bucket_id" {
      description = "The name/ID of the S3 bucket."
@@ -67,4 +63,12 @@ data "aws_iam_policy_document" "combined_policy" {
 resource "aws_s3_bucket_policy" "this" {
   bucket = aws_s3_bucket.this.id
   policy = data.aws_iam_policy_document.combined_policy.json
+} 
+resource "aws_s3_bucket" "this" {
+  bucket = var.bucket_name
+
+  tags = {
+    Name        = var.bucket_name
+    Environment = var.environment
+  }
 }

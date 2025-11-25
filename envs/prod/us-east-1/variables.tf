@@ -1,26 +1,32 @@
-# envs/prod/variables.tf
+# envs/prod/us-east-1/variables.tf
+
+variable "region" {
+  description = "AWS region to deploy resources into"
+  type        = string
+  default     = "us-east-1"
+}
 
 variable "environment" {
-  type        = string
   description = "Environment name (dev, test, prod)"
+  type        = string
   default     = "prod"
 }
 
 variable "enable_nat" {
-  type        = bool
   description = "Toggle NAT Gateway creation"
+  type        = bool
   default     = false
 }
 
 variable "enable_alb_web" {
-  type        = bool
   description = "Toggle public web-facing ALB"
+  type        = bool
   default     = false
 }
 
 variable "enable_alb_app" {
-  type        = bool
   description = "Toggle private app-facing ALB"
+  type        = bool
   default     = false
 }
 
@@ -42,7 +48,25 @@ variable "ami_id_app" {
   }
 }
 
-variable "instance_type" {
+variable "web_instance_type" {
+  description = "Instance type for ASG EC2 instances"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "app_instance_type" {
+  description = "Instance type for ASG EC2 instances"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "ec2_instance_type" {
+  description = "Instance type for ASG EC2 instances"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "db_instance_type" {
   description = "Instance type for ASG EC2 instances"
   type        = string
   default     = "t3.micro"
@@ -55,8 +79,8 @@ variable "user_data_base64" {
 }
 
 variable "enable_ec2" {
-  type        = bool
   description = "Toggle EC2 instance (AMI builder)"
+  type        = bool
   default     = false
 }
 

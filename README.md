@@ -102,9 +102,18 @@ terraform init -backend-config="backend.hcl"
 ```bash
 terraform fmt
 terraform validate
-terraform plan
-terraform apply
+terraform plan -out=tfplan
+terraform apply tfplan
 ```
+
+To override any `default=false`, add a `-var=enable_*=true` to the `terraform apply`.
+
+For example:
+```bash
+tarraform apply -var="enable_ec2=true"
+```
+
+This will allow AWS resources that may not fall within the free-tier to be disabled until ready to capture evidence screenshots. After evidence screenshots are taken, reapplying the `terraform apply` with take the default variable and distroy any resources that were created during the override.
 
 ## Branch Workflow
 

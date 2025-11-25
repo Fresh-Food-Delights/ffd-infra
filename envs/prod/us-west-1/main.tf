@@ -1,7 +1,7 @@
-# envs/prod/us-west-1.tf
+# envs/prod/us-west-1/main.tf
 
 provider "aws" {
-  region = "us-west-1"
+  region = var.region
 }
 
 module "vpc" {
@@ -14,10 +14,10 @@ module "subnets" {
   source                   = "../../../modules/subnet"
   environment              = var.environment
   vpc_id                   = module.vpc.vpc_id
-  public_subnet_cidrs      = { "us-west-1a" = "10.1.1.0/24", "us-west-1c" = "10.1.2.0/24" }
-  private_web_subnet_cidrs = { "us-west-1a" = "10.1.11.0/24", "us-west-1c" = "10.1.12.0/24" }
-  private_app_subnet_cidrs = { "us-west-1a" = "10.1.21.0/24", "us-west-1c" = "10.1.22.0/24" }
-  private_db_subnet_cidrs  = { "us-west-1a" = "10.1.31.0/24", "us-west-1c" = "10.1.32.0/24" }
+  public_subnet_cidrs      = { "${var.region}a" = "10.1.1.0/24", "${var.region}c" = "10.1.2.0/24" }
+  private_web_subnet_cidrs = { "${var.region}a" = "10.1.11.0/24", "${var.region}c" = "10.1.12.0/24" }
+  private_app_subnet_cidrs = { "${var.region}a" = "10.1.21.0/24", "${var.region}c" = "10.1.22.0/24" }
+  private_db_subnet_cidrs  = { "${var.region}a" = "10.1.31.0/24", "${var.region}c" = "10.1.32.0/24" }
 }
 
 module "nat" {
@@ -277,8 +277,8 @@ module "asg_web" {
   subnet_ids         = values(module.subnets.private_web_subnet_ids)
   security_group_ids = [module.security_web.security_group_id]
   target_group_arn   = module.alb_web.target_group_arn
-  ami_id             = var.ami_id_web["us-west-1"]
-  instance_type      = var.instance_type
+  ami_id             = var.ami_id_web["${var.region}"]
+  instance_type      = var.web_instance_type
   user_data_base64   = var.user_data_base64
   desired_capacity   = 0
   min_size           = 0
@@ -291,8 +291,8 @@ module "asg_app" {
   subnet_ids         = values(module.subnets.private_app_subnet_ids)
   security_group_ids = [module.security_app.security_group_id]
   target_group_arn   = module.alb_app.target_group_arn
-  ami_id             = var.ami_id_app["us-west-1"]
-  instance_type      = var.instance_type
+  ami_id             = var.ami_id_app["${var.region}"]
+  instance_type      = var.app_instance_type
   user_data_base64   = var.user_data_base64
   desired_capacity   = 0
   min_size           = 0
@@ -302,8 +302,8 @@ module "asg_app" {
 module "ec2" {
   source             = "../../../modules/ec2"
   environment        = var.environment
-  ami_id             = var.ami_id_web["us-west-1"]
-  instance_type      = var.instance_type
+  ami_id             = var.ami_id_web["${var.region}"]
+  instance_type      = var.ec2_instance_type
   name               = "ami-builder"
   subnet_id          = module.subnets.private_web_subnet_ids["us-west-1a"]
   security_group_ids = [module.security_web.security_group_id]
@@ -313,9 +313,23 @@ module "ec2" {
 module "ssm" {
   source             = "../../../modules/ssm"
   environment        = var.environment
-  region             = "us-west-1"
+  region             = var.region
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = values(module.subnets.private_app_subnet_ids)
   security_group_ids = [module.security_app.security_group_id]
   enable             = var.enable_ssm
+}
+
+module "web_s3_bucket" {
+  source      = "../../../modules/s3"
+  environment = var.environment
+  region      = var.region
+  bucket_name = "ffd-web-data-${var.environment}-7714022395766-${var.region}"
+}
+
+module "app_s3_bucket" {
+  source      = "../../../modules/s3"
+  environment = var.environment
+  region      = var.region
+  bucket_name = "ffd-app-data-${var.environment}-7714022395766-${var.region}"
 }
