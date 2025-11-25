@@ -4,10 +4,6 @@ provider "aws" {
   region = "us-east-1"  # or your chosen region
 }
 
-   output "s3_bucket_id" {
-     description = "The name/ID of the S3 bucket."
-     value       = aws_s3_bucket.this.id
-   }
 
 data "aws_iam_policy_document" "combined_policy" {
   
