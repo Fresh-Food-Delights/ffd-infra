@@ -7,7 +7,7 @@ variable "region" {
 }
 
 variable "environment" {
-  description = "Environment name (dev, test, prod)"
+  description = "Deployment environment for this stack"
   type        = string
   default     = "dev"
 }
