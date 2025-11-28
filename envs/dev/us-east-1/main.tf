@@ -32,6 +32,13 @@ module "iam" {
   environment = var.environment
 }
 
+locals {
+  admin_group_name = module.iam.admin_group_name
+  admin_group_id   = module.iam.admin_group_id
+  ops_group_name   = module.iam.ops_group_name
+  ops_group_id     = module.iam.ops_group_id
+}
+
 module "routing" {
   source                 = "../../../modules/routing"
   environment            = var.environment
