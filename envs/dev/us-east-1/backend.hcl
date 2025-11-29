@@ -1,4 +1,4 @@
-# envs/dev/backend.hcl
+# envs/dev/us-east-1/backend.hcl
 
 bucket          = "ffd-tfstate-7714022395766-us-east-1"
 key             = "envs/dev/terraform.tfstate"
