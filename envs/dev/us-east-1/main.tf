@@ -336,7 +336,7 @@ module "web_s3_bucket" {
   source      = "../../../modules/s3"
   environment = var.environment
   region      = var.region
-  bucket_name = "ffd-web-data-${var.environment}-7714022395766-${var.region}"
+  bucket_name = "ffd-web-data-${var.environment}-${var.region}"
 }
 
 module "app_s3_bucket" {
