@@ -35,7 +35,7 @@ variable "ami_id_web" {
   type        = map(string)
   default = {
     "us-east-1" = "ami-0f00d706c4a80fd93"
-    "us-west-1" = "ami-0e45116a579f0029a"
+    "us-west-1" = "ami-0006186c2c6ff203"
   }
 }
 
@@ -44,7 +44,7 @@ variable "ami_id_app" {
   type        = map(string)
   default = {
     "us-east-1" = "ami-0f00d706c4a80fd93"
-    "us-west-1" = "ami-0e45116a579f0029a"
+    "us-west-1" = "ami-0006186c2c6ff203"
   }
 }
 
