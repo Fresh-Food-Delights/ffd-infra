@@ -8,9 +8,7 @@
             "Action": "s3:*",
             "Resource": [
                 "arn:aws:s3:::dev-bucket-us-east-1",
-                "arn:aws:s3:::dev-bucket-us-east-1/*",
-                "arn:aws:s3:::dev-bucket-us-west-1",  // New entry for US West
-                "arn:aws:s3:::dev-bucket-us-west-1/*" // New entry for US West
+                "arn:aws:s3:::dev-bucket-us-east-1/*"
             ],
             "Condition": { "Bool": { "aws:SecureTransport": "false" } }
         },
@@ -21,12 +19,10 @@
             "Action": "s3:*",
             "Resource": [
                 "arn:aws:s3:::dev-bucket-us-east-1",
-                "arn:aws:s3:::dev-bucket-us-east-1/*",
-                "arn:aws:s3:::dev-bucket-us-west-1",  // New entry for US West
-                "arn:aws:s3:::dev-bucket-us-west-1/*" // New entry for US West
+                "arn:aws:s3:::dev-bucket-us-east-1/*" 
             ],
             "Condition": {
-                "StringNotEquals": { "aws:PrincipalAccount": "your-account-id" }
+                "StringNotEquals": { "aws:PrincipalAccount": "771402395766" }
             }
         }
     ]
