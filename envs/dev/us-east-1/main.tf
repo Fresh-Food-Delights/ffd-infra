@@ -1,15 +1,57 @@
-# envs/dev/us-east-1/main.tf
+# ==============================================================================
+# FFD DEV ENVIRONMENT (US-EAST-1)
+#
+# This file serves as the entry point for the dev environment in the us-east-1
+# region, orchestrating the deployment of all infrastructure components.
+# ==============================================================================
 
+# ----------------------------------------------------
+# 1. TERRAFORM BLOCK (State and Providers)
+#
+# FIX: Removed the 'backend "s3"' block to avoid the "Backend configuration
+# specified multiple times" error, relying on the CI/CD runner to pass the
+# configuration via -backend-config.
+# ----------------------------------------------------
+terraform {
+  required_providers {
+    # Specify the required providers for this configuration
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+# ----------------------------------------------------
+# 2. PROVIDER
+# ----------------------------------------------------
 provider "aws" {
   region = var.region
 }
 
+# ----------------------------------------------------
+# 3. LOCALS (Configuration Variables)
+# ----------------------------------------------------
+locals {
+  # IAM outputs used for security modules
+  admin_group_name = module.iam.admin_group_name
+  admin_group_id   = module.iam.admin_group_id
+  ops_group_name   = module.iam.ops_group_name
+  ops_group_id     = module.iam.ops_group_id
+}
+
+# ----------------------------------------------------
+# 4. MODULES
+# ----------------------------------------------------
+
+# VPC Module
 module "vpc" {
   source      = "../../../modules/vpc"
   environment = var.environment
   vpc_cidr    = "10.0.0.0/16"
 }
 
+# Subnets Module (Uses specific CIDRs and relies on VPC ID)
 module "subnets" {
   source                   = "../../../modules/subnet"
   environment              = var.environment
@@ -20,6 +62,7 @@ module "subnets" {
   private_db_subnet_cidrs  = { "${var.region}a" = "10.0.31.0/24", "${var.region}b" = "10.0.32.0/24" }
 }
 
+# NAT Gateway Module (Provides internet access to private subnets)
 module "nat" {
   source            = "../../../modules/nat"
   environment       = var.environment
@@ -27,37 +70,37 @@ module "nat" {
   enable            = var.enable_nat
 }
 
+# IAM Module (Defines Users and Groups)
 module "iam" {
   source      = "../../../modules/iam"
   environment = var.environment
 }
 
-locals {
-  admin_group_name = module.iam.admin_group_name
-  admin_group_id   = module.iam.admin_group_id
-  ops_group_name   = module.iam.ops_group_name
-  ops_group_id     = module.iam.ops_group_id
+# Routing Module (Route Tables, Routes, and Associations)
+module "routing" {
+  source                   = "../../../modules/routing"
+  environment              = var.environment
+  vpc_id                   = module.vpc.vpc_id
+  public_subnet_ids        = module.subnets.public_subnet_ids
+  private_web_subnet_ids   = module.subnets.private_web_subnet_ids
+  private_app_subnet_ids   = module.subnets.private_app_subnet_ids
+  private_db_subnet_ids    = module.subnets.private_db_subnet_ids
+  enable_nat_gateway       = var.enable_nat
+  nat_gateway_ids          = module.nat.nat_gateway_ids
+  internet_gateway_id      = module.vpc.internet_gateway_id
+  # Note: VPC endpoint IDs are commented out below, assuming they are not yet fully implemented
+  # vpce_s3_id               = null
+  # vpce_dynamodb_id         = null
+  # vpce_ssm_id              = null
+  # vpce_ssmmessages_id      = null
+  # vpce_ec2messages_id      = null
+  # vpce_kms_id              = null
+  # vpce_secretsmanager_id   = null
 }
 
-module "routing" {
-  source                 = "../../../modules/routing"
-  environment            = var.environment
-  vpc_id                 = module.vpc.vpc_id
-  public_subnet_ids      = module.subnets.public_subnet_ids
-  private_web_subnet_ids = module.subnets.private_web_subnet_ids
-  private_app_subnet_ids = module.subnets.private_app_subnet_ids
-  private_db_subnet_ids  = module.subnets.private_db_subnet_ids
-  enable_nat_gateway     = var.enable_nat
-  nat_gateway_ids        = module.nat.nat_gateway_ids
-  internet_gateway_id    = module.vpc.internet_gateway_id
-  #  vpce_s3_id             = null
-  #  vpce_dynamodb_id       = null
-  #  vpce_ssm_id            = null
-  #  vpce_ssmmessages_id    = null
-  #  vpce_ec2messages_id    = null
-  #  vpce_kms_id            = null
-  #  vpce_secretsmanager_id = null
-}
+# ----------------------------------------------------
+# SECURITY GROUPS
+# ----------------------------------------------------
 
 module "security_alb_web" {
   source      = "../../../modules/security"
@@ -257,6 +300,10 @@ module "security_internal" {
   ]
 }
 
+# ----------------------------------------------------
+# LOAD BALANCERS
+# ----------------------------------------------------
+
 module "alb_web" {
   source             = "../../../modules/alb-web"
   environment        = var.environment
@@ -282,6 +329,10 @@ module "alb_app" {
   health_check_path  = "/"
   enable             = var.enable_alb_app
 }
+
+# ----------------------------------------------------
+# AUTO SCALING GROUPS
+# ----------------------------------------------------
 
 module "asg_web" {
   source             = "../../../modules/asg-web"
@@ -310,6 +361,10 @@ module "asg_app" {
   min_size           = 0
   max_size           = 0
 }
+
+# ----------------------------------------------------
+# UTILITY/SERVICE RESOURCES
+# ----------------------------------------------------
 
 module "ec2" {
   source             = "../../../modules/ec2"
