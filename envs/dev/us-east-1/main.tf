@@ -46,10 +46,10 @@ locals {
 
 # Subnets Module (Must run before VPC as VPC Endpoints need subnet IDs)
 module "subnets" {
-  source                   = "../../modules/subnet" # Adjusted to the logical path
-  environment              = var.environment
-  vpc_id                   = module.vpc.vpc_id
-  public_subnet_cidrs      = { "${var.region}a" = "10.0.1.0/24", "${var.region}b" = "10.0.2.0/24" }
+  source                     = "../../../modules/subnet" # CORRECTED PATH
+  environment                = var.environment
+  vpc_id                     = module.vpc.vpc_id
+  public_subnet_cidrs        = { "${var.region}a" = "10.0.1.0/24", "${var.region}b" = "10.0.2.0/24" }
   private_web_subnet_cidrs = { "${var.region}a" = "10.0.11.0/24", "${var.region}b" = "10.0.12.0/24" }
   private_app_subnet_cidrs = { "${var.region}a" = "10.0.21.0/24", "${var.region}b" = "10.0.22.0/24" }
   private_db_subnet_cidrs  = { "${var.region}a" = "10.0.31.0/24", "${var.region}b" = "10.0.32.0/24" }
@@ -57,13 +57,13 @@ module "subnets" {
 
 # IAM Module (Defines Users and Groups)
 module "iam" {
-  source      = "../../modules/iam" # Adjusted to the logical path
+  source      = "../../../modules/iam" # CORRECTED PATH
   environment = var.environment
 }
 
 # NAT Gateway Module (Provides internet access to private subnets)
 module "nat" {
-  source            = "../../modules/nat" # Adjusted to the logical path
+  source            = "../../../modules/nat" # CORRECTED PATH
   environment       = var.environment
   public_subnet_ids = module.subnets.public_subnet_ids
   enable            = var.enable_nat
@@ -74,7 +74,7 @@ module "nat" {
 # ----------------------------------------------------
 
 module "security_alb_web" {
-  source      = "../../modules/security" # Adjusted to the logical path
+  source      = "../../../modules/security" # CORRECTED PATH
   name        = "alb-web"
   description = "Security group for Web tier ALB"
   environment = var.environment
@@ -107,7 +107,7 @@ module "security_alb_web" {
 }
 
 module "security_alb_app" {
-  source      = "../../modules/security" # Adjusted to the logical path
+  source      = "../../../modules/security" # CORRECTED PATH
   name        = "alb-app"
   description = "Security group for App tier ALB"
   environment = var.environment
@@ -140,7 +140,7 @@ module "security_alb_app" {
 }
 
 module "security_web" {
-  source      = "../../modules/security" # Adjusted to the logical path
+  source      = "../../../modules/security" # CORRECTED PATH
   name        = "web"
   description = "Web tier SG"
   environment = var.environment
@@ -173,7 +173,7 @@ module "security_web" {
 }
 
 module "security_app" {
-  source      = "../../modules/security" # Adjusted to the logical path
+  source      = "../../../modules/security" # CORRECTED PATH
   name        = "app"
   description = "App tier SG"
   environment = var.environment
@@ -206,7 +206,7 @@ module "security_app" {
 }
 
 module "security_db" {
-  source      = "../../modules/security" # Adjusted to the logical path
+  source      = "../../../modules/security" # CORRECTED PATH
   name        = "db"
   description = "DB tier SG"
   environment = var.environment
@@ -242,7 +242,7 @@ module "security_db" {
 # using its directory name 'vpc_security', but you referred to it
 # as 'module "security_internal"' in your plan. Let's use the explicit name 'vpc_endpoint_sg'
 module "vpc_endpoint_sg" {
-  source      = "../../modules/vpc_security"
+  source      = "../../../modules/vpc_security" # CORRECTED PATH
   environment = var.environment
   vpc_id      = module.vpc.vpc_id
   vpc_cidr    = module.vpc.vpc_cidr # Pass VPC CIDR to the SG for internal rules
@@ -250,7 +250,7 @@ module "vpc_endpoint_sg" {
 
 # VPC Module (Must run after VPC_ENDPOINT_SG as the VPC Endpoints need its ID)
 module "vpc" {
-  source      = "../../modules/vpc" # Adjusted to the logical path based on /envs/dev/us-east-1/
+  source      = "../../../modules/vpc" # CORRECTED PATH
   environment = var.environment
   vpc_cidr    = "10.0.0.0/16"
 
@@ -268,24 +268,24 @@ module "vpc" {
 
 # Routing Module (Route Tables, Routes, and Associations)
 module "routing" {
-  source                   = "../../modules/routing" # Adjusted to the logical path
-  environment              = var.environment
-  vpc_id                   = module.vpc.vpc_id
-  public_subnet_ids        = module.subnets.public_subnet_ids
-  private_web_subnet_ids   = module.subnets.private_web_subnet_ids
-  private_app_subnet_ids   = module.subnets.private_app_subnet_ids
-  private_db_subnet_ids    = module.subnets.private_db_subnet_ids
-  enable_nat_gateway       = var.enable_nat
-  nat_gateway_ids          = module.nat.nat_gateway_ids
-  internet_gateway_id      = module.vpc.internet_gateway_id
+  source                     = "../../../modules/routing" # CORRECTED PATH
+  environment                = var.environment
+  vpc_id                     = module.vpc.vpc_id
+  public_subnet_ids          = module.subnets.public_subnet_ids
+  private_web_subnet_ids     = module.subnets.private_web_subnet_ids
+  private_app_subnet_ids     = module.subnets.private_app_subnet_ids
+  private_db_subnet_ids      = module.subnets.private_db_subnet_ids
+  enable_nat_gateway         = var.enable_nat
+  nat_gateway_ids            = module.nat.nat_gateway_ids
+  internet_gateway_id        = module.vpc.internet_gateway_id
   # FIX: Pass the VPC Endpoint IDs from the VPC module (where they are defined)
-  vpce_s3_id               = module.vpc.vpce_s3_id
-  vpce_dynamodb_id         = module.vpc.vpce_dynamodb_id
-  vpce_ssm_id              = module.vpc.vpce_ssm_id
-  vpce_ssmmessages_id      = module.vpc.vpce_ssmmessages_id
-  vpce_ec2messages_id      = module.vpc.vpce_ec2messages_id
-  vpce_kms_id              = module.vpc.vpce_kms_id
-  vpce_secretsmanager_id   = module.vpc.vpce_secretsmanager_id
+  vpce_s3_id                 = module.vpc.vpce_s3_id
+  vpce_dynamodb_id           = module.vpc.vpce_dynamodb_id
+  vpce_ssm_id                = module.vpc.vpce_ssm_id
+  vpce_ssmmessages_id        = module.vpc.vpce_ssmmessages_id
+  vpce_ec2messages_id        = module.vpc.vpce_ec2messages_id
+  vpce_kms_id                = module.vpc.vpce_kms_id
+  vpce_secretsmanager_id     = module.vpc.vpce_secretsmanager_id
 }
 
 # ----------------------------------------------------
@@ -293,7 +293,7 @@ module "routing" {
 # ----------------------------------------------------
 
 module "alb_web" {
-  source             = "../../modules/alb-web" # Adjusted to the logical path
+  source             = "../../../modules/alb-web" # CORRECTED PATH
   environment        = var.environment
   tier               = "web"
   internal           = false
@@ -306,7 +306,7 @@ module "alb_web" {
 }
 
 module "alb_app" {
-  source             = "../../modules/alb-app" # Adjusted to the logical path
+  source             = "../../../modules/alb-app" # CORRECTED PATH
   environment        = var.environment
   tier               = "app"
   internal           = true
@@ -323,7 +323,7 @@ module "alb_app" {
 # ----------------------------------------------------
 
 module "asg_web" {
-  source             = "../../modules/asg-web" # Adjusted to the logical path
+  source             = "../../../modules/asg-web" # CORRECTED PATH
   environment        = var.environment
   subnet_ids         = values(module.subnets.private_web_subnet_ids)
   security_group_ids = [module.security_web.security_group_id]
@@ -337,7 +337,7 @@ module "asg_web" {
 }
 
 module "asg_app" {
-  source             = "../../modules/asg-app" # Adjusted to the logical path
+  source             = "../../../modules/asg-app" # CORRECTED PATH
   environment        = var.environment
   subnet_ids         = values(module.subnets.private_app_subnet_ids)
   security_group_ids = [module.security_app.security_group_id]
@@ -355,7 +355,7 @@ module "asg_app" {
 # ----------------------------------------------------
 
 module "ec2" {
-  source             = "../../modules/ec2" # Adjusted to the logical path
+  source             = "../../../modules/ec2" # CORRECTED PATH
   environment        = var.environment
   ami_id             = var.ami_id_web["${var.region}"]
   instance_type      = var.ec2_instance_type
@@ -366,7 +366,7 @@ module "ec2" {
 }
 
 module "ssm" {
-  source             = "../../modules/ssm" # Adjusted to the logical path
+  source             = "../../../modules/ssm" # CORRECTED PATH
   environment        = var.environment
   region             = var.region
   vpc_id             = module.vpc.vpc_id
@@ -376,14 +376,14 @@ module "ssm" {
 }
 
 module "web_s3_bucket" {
-  source      = "../../modules/s3" # Adjusted to the logical path
+  source      = "../../../modules/s3" # CORRECTED PATH
   environment = var.environment
   region      = var.region
   bucket_name = "ffd-web-data-${var.environment}-${var.region}-5766"
 }
 
 module "app_s3_bucket" {
-  source      = "../../modules/s3" # Adjusted to the logical path
+  source      = "../../../modules/s3" # CORRECTED PATH
   environment = var.environment
   region      = var.region
   bucket_name = "ffd-app-data-${var.environment}-7714022395766-${var.region}"
