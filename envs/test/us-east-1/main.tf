@@ -333,3 +333,17 @@ module "app_s3_bucket" {
   region      = var.region
   bucket_name = "ffd-app-data-${var.environment}-7714022395766-${var.region}"
 }
+
+# envs/test/us-east-1/main.tf
+
+module "iam" {
+  source      = "../../../modules/iam"
+  environment = var.environment
+}
+
+locals {
+  admin_group_name = module.iam.admin_group_name
+  admin_group_id   = module.iam.admin_group_id
+  ops_group_name   = module.iam.ops_group_name
+  ops_group_id     = module.iam.ops_group_id
+}

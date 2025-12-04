@@ -89,3 +89,9 @@ variable "enable_ssm" {
   type        = bool
   default     = false
 }
+
+variable "environment" {
+  description = "Deployment environment for this stack"
+  type        = string
+  default     = "prod"      
+}

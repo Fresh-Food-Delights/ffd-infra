@@ -337,3 +337,17 @@ resource "aws_s3_bucket_policy" "web_bucket_policy" {
   bucket = module.web_s3_bucket.bucket_name
   policy = file("path/to/web-bucket-policy.json") # Update the path to your policy file
 }
+
+# envs/prod/us-east-1/main.tf
+
+module "iam" {
+  source      = "../../../modules/iam"
+  environment = var.environment
+}
+
+locals {
+  admin_group_name = module.iam.admin_group_name
+  admin_group_id   = module.iam.admin_group_id
+  ops_group_name   = module.iam.ops_group_name
+  ops_group_id     = module.iam.ops_group_id
+}
