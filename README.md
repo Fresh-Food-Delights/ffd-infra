@@ -134,3 +134,4 @@ This will allow AWS resources that may not fall within the free-tier to be disab
 - [ ] Implement CloudFront, WAF, and DNS edge controls
 - [ ] Deploy monitoring stack (logs, alarms, dashboards)
 - [ ] Final testing, DR, documentation, and teardown readiness
+
