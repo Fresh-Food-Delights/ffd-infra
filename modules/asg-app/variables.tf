@@ -1,4 +1,4 @@
-# modules/asg-app/variables.tf
+# /modules/asg-app/variables.tf
 
 variable "environment" {
   type        = string

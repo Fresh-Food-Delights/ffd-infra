@@ -1,4 +1,4 @@
-# modules/iam/outputs.tf
+# /modules/iam/outputs.tf
 
 output "admin_group_name" {
   description = "Name of the IT admin IAM group"

@@ -1,4 +1,4 @@
-# modules/ec2/variables.tf
+# /modules/ec2/variables.tf
 
 variable "name" {
   description = "Instance name suffix"

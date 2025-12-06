@@ -1,4 +1,4 @@
-# modules/s3/variables.tf
+# /modules/s3/variables.tf
 
 variable "region" {
   description = "AWS region"

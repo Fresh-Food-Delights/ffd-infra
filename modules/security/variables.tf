@@ -1,4 +1,4 @@
-# modules/security/variables.tf
+# /modules/security/variables.tf
 
 variable "name" {
   type        = string

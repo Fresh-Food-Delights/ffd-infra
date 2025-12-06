@@ -1,4 +1,15 @@
-# envs/prod/us-east-1/main.tf
+# /envs/prod/us-east-1/main.tf
+
+terraform {
+  required_version = ">= 1.6"
+  backend "s3" {}
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
 
 provider "aws" {
   region = var.region
@@ -43,7 +54,6 @@ module "routing" {
   #  vpce_ssm_id            = null
   #  vpce_ssmmessages_id    = null
   #  vpce_ec2messages_id    = null
-  #  vpce_kms_id            = null
   #  vpce_secretsmanager_id = null
 }
 
@@ -302,7 +312,7 @@ module "asg_app" {
 module "ec2" {
   source             = "../../../modules/ec2"
   environment        = var.environment
-  ami_id             = var.ami_id_web["${var.region}"]
+  ami_id             = var.ami_id_app["${var.region}"]
   instance_type      = var.ec2_instance_type
   name               = "ami-builder"
   subnet_id          = module.subnets.private_web_subnet_ids["us-east-1a"]
@@ -324,12 +334,12 @@ module "web_s3_bucket" {
   source      = "../../../modules/s3"
   environment = var.environment
   region      = var.region
-  bucket_name = "ffd-web-data-${var.environment}-7714022395766-${var.region}"
+  bucket_name = "ffd-web-data-${var.environment}-771402395766-${var.region}"
 }
 
 module "app_s3_bucket" {
   source      = "../../../modules/s3"
   environment = var.environment
   region      = var.region
-  bucket_name = "ffd-app-data-${var.environment}-7714022395766-${var.region}"
+  bucket_name = "ffd-app-data-${var.environment}-771402395766-${var.region}"
 }

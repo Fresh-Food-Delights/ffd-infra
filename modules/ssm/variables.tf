@@ -1,4 +1,4 @@
-# modules/ssm/variables.tf
+# /modules/ssm/variables.tf
 
 variable "environment" {
   description = "Environment name (dev/test/prod)"

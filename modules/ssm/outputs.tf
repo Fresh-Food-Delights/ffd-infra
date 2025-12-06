@@ -1,4 +1,4 @@
-# modules/ssm/outputs.tf
+# /modules/ssm/outputs.tf
 
 output "ssm_endpoint_id" {
   value       = length(aws_vpc_endpoint.ssm) > 0 ? aws_vpc_endpoint.ssm[0].id : null

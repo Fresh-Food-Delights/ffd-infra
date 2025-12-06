@@ -1,4 +1,4 @@
-# modules/alb-app/main.tf
+# /modules/alb-app/main.tf
 
 resource "aws_lb" "this" {
   count              = var.enable ? 1 : 0

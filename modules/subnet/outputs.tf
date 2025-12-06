@@ -1,4 +1,4 @@
-# modules/subnet/outputs.tf
+# /modules/subnet/outputs.tf
 
 output "public_subnet_ids" {
   description = "Map of AZ to Public Subnet IDs"

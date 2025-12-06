@@ -1,4 +1,4 @@
-# modules/nat/main.tf
+# /modules/nat/main.tf
 
 resource "aws_eip" "this" {
   for_each = var.enable ? var.public_subnet_ids : {}

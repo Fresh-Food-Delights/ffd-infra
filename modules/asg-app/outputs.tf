@@ -1,4 +1,4 @@
-# modules/asg-app/outputs.tf
+# /modules/asg-app/outputs.tf
 
 output "asg_name" {
   value       = aws_autoscaling_group.this.name

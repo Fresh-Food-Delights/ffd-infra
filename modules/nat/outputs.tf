@@ -1,4 +1,4 @@
-# modules/nat/outputs.tf
+# /modules/nat/outputs.tf
 
 output "nat_gateway_ids" {
   description = "Map of AZs to NAT Gateway IDs"

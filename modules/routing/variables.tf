@@ -1,4 +1,4 @@
-# modules/routing/variables.tf
+# /modules/routing/variables.tf
 
 variable "environment" {
   description = "Environment name (dev, test, prod)"

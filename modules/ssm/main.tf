@@ -1,4 +1,4 @@
-# modules/ssm/main.tf
+# /modules/ssm/main.tf
 
 resource "aws_vpc_endpoint" "ssm" {
   count               = var.enable ? 1 : 0
