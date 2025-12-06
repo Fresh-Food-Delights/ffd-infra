@@ -1,4 +1,4 @@
-# modules/asg-app/main.tf
+# /modules/asg-app/main.tf
 
 resource "aws_launch_template" "this" {
   name_prefix   = "ffd-${var.environment}-app-"

@@ -1,4 +1,4 @@
-# modules/alb-app/variables.tf
+# /modules/alb-app/variables.tf
 
 variable "environment" {
   type        = string

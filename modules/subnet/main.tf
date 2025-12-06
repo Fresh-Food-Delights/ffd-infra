@@ -1,4 +1,4 @@
-# modules/subnet/main.tf
+# /modules/subnet/main.tf
 
 # Public Subnets (1 per AZ)
 resource "aws_subnet" "public" {

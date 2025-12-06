@@ -1,3 +1,5 @@
+# /modules/iam/main.tf
+
 resource "aws_iam_group" "it_admin_group" {
   name = "ffd-aws-it-admin-${var.environment}-7714022395766"
 }

@@ -1,4 +1,4 @@
-# modules/routing/main.tf
+# /modules/routing/main.tf
 
 resource "aws_route_table" "public" {
   vpc_id = var.vpc_id

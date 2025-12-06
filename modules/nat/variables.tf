@@ -1,4 +1,4 @@
-# modules/nat/variables.tf
+# /modules/nat/variables.tf
 
 variable "environment" {
   description = "Environment name (e.g. dev, test, prod)"

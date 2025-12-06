@@ -1,4 +1,4 @@
-# modules/routing/outputs.tf
+# /modules/routing/outputs.tf
 
 output "public_route_table_id" {
   description = "Route table ID for the public subnet tier"

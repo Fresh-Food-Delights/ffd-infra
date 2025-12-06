@@ -1,4 +1,4 @@
-# modules/s3/main.tf
+# /modules/s3/main.tf
 
 provider "aws" {
   region = "us-east-1"  # or your chosen region

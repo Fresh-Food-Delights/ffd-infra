@@ -1,4 +1,4 @@
-# envs/test/us-east-1/variables.tf
+# /envs/test/us-east-1/variables.tf
 
 variable "region" {
   description = "AWS region to deploy resources into"

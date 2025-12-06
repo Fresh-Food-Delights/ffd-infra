@@ -1,4 +1,4 @@
-# modules/alb-web/variables.tf
+# /modules/alb-web/variables.tf
 
 variable "environment" {
   type        = string

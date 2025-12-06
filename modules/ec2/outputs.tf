@@ -1,4 +1,4 @@
-# modules/ec2/outputs.tf
+# /modules/ec2/outputs.tf
 
 output "instance_id" {
   description = "ID of the EC2 instance"

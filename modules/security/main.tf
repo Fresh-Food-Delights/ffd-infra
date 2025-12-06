@@ -1,4 +1,4 @@
-# modules/security/main.tf
+# /modules/security/main.tf
 
 resource "aws_security_group" "this" {
   name        = "ffd-${var.environment}-${var.name}"

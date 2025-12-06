@@ -1,4 +1,4 @@
-# modules/alb-app/outputs.tf
+# /modules/alb-app/outputs.tf
 
 output "alb_arn" {
   value       = var.enable && length(aws_lb.this) > 0 ? aws_lb.this[0].arn : null

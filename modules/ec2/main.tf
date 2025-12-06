@@ -1,4 +1,4 @@
-# modules/ec2/main.tf
+# /modules/ec2/main.tf
 
 resource "aws_iam_role" "ssm" {
   count = var.enable ? 1 : 0
