@@ -1,7 +1,7 @@
 # /envs/prod/us-west-1/main.tf
 
 terraform {
-  required_version = ">= 1.6"
+  required_version = ">= 1.10"
   backend "s3" {}
   required_providers {
     aws = {
