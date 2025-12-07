@@ -1,16 +1,21 @@
 # /modules/ssm/outputs.tf
 
 output "ssm_endpoint_id" {
-  value       = length(aws_vpc_endpoint.ssm) > 0 ? aws_vpc_endpoint.ssm[0].id : null
-  description = "ID of the SSM endpoint"
+  description = "VPC endpoint ID for SSM"
+  value       = var.enable ? aws_vpc_endpoint.ssm[0].id : null
 }
 
-output "ssmmessages_endpoint_id" {
-  value       = length(aws_vpc_endpoint.ssmmessages) > 0 ? aws_vpc_endpoint.ssmmessages[0].id : null
-  description = "ID of the SSM Messages endpoint"
+output "ssm_messages_endpoint_id" {
+  description = "VPC endpoint ID for SSM Messages"
+  value       = var.enable ? aws_vpc_endpoint.ssm_messages[0].id : null
 }
 
-output "ec2messages_endpoint_id" {
-  value       = length(aws_vpc_endpoint.ec2messages) > 0 ? aws_vpc_endpoint.ec2messages[0].id : null
-  description = "ID of the EC2 Messages endpoint"
+output "ec2_messages_endpoint_id" {
+  description = "VPC endpoint ID for EC2 Messages"
+  value       = var.enable ? aws_vpc_endpoint.ec2_messages[0].id : null
+}
+
+output "ssm_instance_profile_name" {
+  value       = try(aws_iam_instance_profile.ssm_instance_profile[0].name, null)
+  description = "IAM instance profile to attach to EC2/ASG for SSM"
 }

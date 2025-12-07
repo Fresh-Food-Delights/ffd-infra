@@ -1,5 +1,15 @@
 # /modules/ssm/main.tf
 
+terraform {
+  required_version = ">= 1.10"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
 resource "aws_vpc_endpoint" "ssm" {
   count               = var.enable ? 1 : 0
   vpc_id              = var.vpc_id
@@ -9,12 +19,13 @@ resource "aws_vpc_endpoint" "ssm" {
   security_group_ids  = var.security_group_ids
   private_dns_enabled = true
   tags                = {
-    Name        = "ffd-${var.environment}-ssm"
+    Name        = "ffd-${var.environment}-ssm-vpce"
     Environment = var.environment
+    Tier        = "management"
   }
 }
 
-resource "aws_vpc_endpoint" "ssmmessages" {
+resource "aws_vpc_endpoint" "ssm_messages" {
   count               = var.enable ? 1 : 0
   vpc_id              = var.vpc_id
   service_name        = "com.amazonaws.${var.region}.ssmmessages"
@@ -23,12 +34,13 @@ resource "aws_vpc_endpoint" "ssmmessages" {
   security_group_ids  = var.security_group_ids
   private_dns_enabled = true
   tags                = {
-    Name        = "ffd-${var.environment}-ssmmessages"
+    Name        = "ffd-${var.environment}-ssmmessages-vpce"
     Environment = var.environment
+    Tier        = "management"
   }
 }
 
-resource "aws_vpc_endpoint" "ec2messages" {
+resource "aws_vpc_endpoint" "ec2_messages" {
   count               = var.enable ? 1 : 0
   vpc_id              = var.vpc_id
   service_name        = "com.amazonaws.${var.region}.ec2messages"
@@ -37,7 +49,36 @@ resource "aws_vpc_endpoint" "ec2messages" {
   security_group_ids  = var.security_group_ids
   private_dns_enabled = true
   tags                = {
-    Name        = "ffd-${var.environment}-ec2messages"
+    Name        = "ffd-${var.environment}-ec2messages-vpce"
     Environment = var.environment
+    Tier        = "management"
   }
+}
+
+resource "aws_iam_role" "ssm_instance_role" {
+  count              = var.enable ? 1 : 0
+  name               = "ffd-${var.environment}-ssm-instance-role"
+  assume_role_policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_core" {
+  count      = var.enable ? 1 : 0
+  role       = aws_iam_role.ssm_instance_role[0].name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_instance_profile" "ssm_instance_profile" {
+  count = var.enable ? 1 : 0
+
+  name = "ffd-${var.environment}-ssm-instance-profile"
+  role = aws_iam_role.ssm_instance_role[0].name
 }

@@ -49,6 +49,11 @@ variable "tags" {
   default     = {}
 }
 
+variable "tier" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+}
+
 variable "enable" {
   description = "Toggle creation of the EC2 instance"
   type        = bool

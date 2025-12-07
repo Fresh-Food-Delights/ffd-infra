@@ -21,6 +21,22 @@ module "vpc" {
   vpc_cidr    = "10.1.0.0/16"
 }
 
+module "vpc_endpoints" {
+  source             = "../../../modules/vpc_endpoints"
+  environment        = var.environment
+  region             = var.region
+  vpc_id             = module.vpc.vpc_id
+  private_subnet_ids = values(module.subnets.private_app_subnet_ids)
+
+  private_route_table_ids = [
+    module.routing.private_web_route_table_id,
+    module.routing.private_app_route_table_id,
+    module.routing.private_db_route_table_id,
+  ]
+
+  security_group_ids = [module.security_internal.security_group_id]
+}
+
 module "subnets" {
   source                   = "../../../modules/subnet"
   environment              = var.environment
@@ -49,12 +65,6 @@ module "routing" {
   enable_nat_gateway     = var.enable_nat
   nat_gateway_ids        = module.nat.nat_gateway_ids
   internet_gateway_id    = module.vpc.internet_gateway_id
-  #  vpce_s3_id             = null
-  #  vpce_dynamodb_id       = null
-  #  vpce_ssm_id            = null
-  #  vpce_ssmmessages_id    = null
-  #  vpce_ec2messages_id    = null
-  #  vpce_secretsmanager_id = null
 }
 
 module "security_alb_web" {
@@ -312,10 +322,11 @@ module "asg_app" {
 module "ec2" {
   source             = "../../../modules/ec2"
   environment        = var.environment
+  tier               = "web"
   ami_id             = var.ami_id_app["${var.region}"]
   instance_type      = var.ec2_instance_type
   name               = "ami-builder"
-  subnet_id          = module.subnets.private_web_subnet_ids["us-west-1a"]
+  subnet_id          = module.subnets.private_web_subnet_ids["${var.region}a"]
   security_group_ids = [module.security_web.security_group_id]
   enable             = var.enable_ec2
 }
@@ -326,20 +337,24 @@ module "ssm" {
   region             = var.region
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = values(module.subnets.private_app_subnet_ids)
-  security_group_ids = [module.security_app.security_group_id]
+  security_group_ids = [module.security_internal.security_group_id]
   enable             = var.enable_ssm
 }
 
 module "web_s3_bucket" {
   source      = "../../../modules/s3"
+  account_id  = var.account_id
   environment = var.environment
   region      = var.region
-  bucket_name = "ffd-web-data-${var.environment}-771402395766-${var.region}"
+  tier        = "web"
+  bucket_name = "ffd-data-web-${var.environment}-${var.account_id}-${var.region}"
 }
 
 module "app_s3_bucket" {
   source      = "../../../modules/s3"
+  account_id  = var.account_id
   environment = var.environment
   region      = var.region
-  bucket_name = "ffd-app-data-${var.environment}-771402395766-${var.region}"
+  tier        = "app"
+  bucket_name = "ffd-data-app-${var.environment}-${var.account_id}-${var.region}"
 }

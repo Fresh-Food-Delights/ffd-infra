@@ -1,8 +1,6 @@
 # /modules/nat/outputs.tf
 
 output "nat_gateway_ids" {
-  description = "Map of AZs to NAT Gateway IDs"
-  value       = var.enable ? {
-    for az, natgw in aws_nat_gateway.this : az => natgw.id
-  } : {}
+  description = "List of NAT gateway IDs for this environment"
+  value       = var.enable ? [for gw in aws_nat_gateway.this : gw.id] : []
 }

@@ -1,70 +1,66 @@
 # /modules/s3/main.tf
 
-provider "aws" {
-  region = "us-east-1"  # or your chosen region
-}
-
-
-data "aws_iam_policy_document" "combined_policy" {
-  
-  # 1. Deny Insecure Transport (SSL only)
-  statement {
-    sid     = "DenyInsecureTransport"
-    effect  = "Deny"
-    actions = ["s3:*"]
-    
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
-
-    # This dynamically grabs the ARN of whatever bucket is being created
-    resources = [
-      aws_s3_bucket.this.arn,
-      "${aws_s3_bucket.this.arn}/*"
-    ]
-
-    condition {
-      test     = "Bool"
-      variable = "aws:SecureTransport"
-      values   = ["false"]
-    }
-  }
-
-  # 2. Limit to Your Account ID (771402395766)
-  statement {
-    sid     = "LimitToAccount"
-    effect  = "Deny"
-    actions = ["s3:*"]
-
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
-
-    resources = [
-      aws_s3_bucket.this.arn,
-      "${aws_s3_bucket.this.arn}/*"
-    ]
-
-    condition {
-      test     = "StringNotEquals"
-      variable = "aws:PrincipalAccount"
-      values   = ["771402395766"] 
+terraform {
+  required_version = ">= 1.10"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
     }
   }
 }
 
-# 3. Attach the policy to the bucket
-resource "aws_s3_bucket_policy" "this" {
-  bucket = aws_s3_bucket.this.id
-  policy = data.aws_iam_policy_document.combined_policy.json
-} 
 resource "aws_s3_bucket" "this" {
   bucket = var.bucket_name
 
   tags = {
-    Name        = var.bucket_name
     Environment = var.environment
+    Region      = var.region
+    Tier        = var.tier
   }
+}
+
+resource "aws_s3_bucket_ownership_controls" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  rule {
+    object_ownership = var.object_ownership
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = var.sse_algorithm
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  policy = templatefile("../../../policies/s3-policy-template.json", {
+    bucket_arn = aws_s3_bucket.this.arn
+    account_id = var.account_id
+    tier       = var.tier
+    env        = var.environment
+    region     = var.region
+  })
+
+  depends_on = [
+    aws_s3_bucket_ownership_controls.this,
+    aws_s3_bucket_public_access_block.this,
+    aws_s3_bucket_server_side_encryption_configuration.this
+  ]
 }

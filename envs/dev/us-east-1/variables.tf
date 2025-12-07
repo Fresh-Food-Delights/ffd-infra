@@ -1,9 +1,9 @@
 # /envs/dev/us-east-1/variables.tf
 
-variable "region" {
-  description = "AWS region to deploy resources into"
+variable "account_id" {
   type        = string
-  default     = "us-east-1"
+  description = "AWS account ID used in S3 bucket naming and policies"
+  default     = "771402395766"
 }
 
 variable "environment" {
@@ -12,22 +12,10 @@ variable "environment" {
   default     = "dev"
 }
 
-variable "enable_nat" {
-  description = "Toggle NAT Gateway creation"
-  type        = bool
-  default     = false
-}
-
-variable "enable_alb_web" {
-  description = "Toggle public web-facing ALB"
-  type        = bool
-  default     = false
-}
-
-variable "enable_alb_app" {
-  description = "Toggle private app-facing ALB"
-  type        = bool
-  default     = false
+variable "region" {
+  description = "AWS region to deploy resources into"
+  type        = string
+  default     = "us-east-1"
 }
 
 variable "ami_id_web" {
@@ -46,6 +34,12 @@ variable "ami_id_app" {
     "us-east-1" = "ami-0f00d706c4a80fd93"
     "us-west-1" = "ami-0e45116a579f0029a"
   }
+}
+
+variable "user_data_base64" {
+  description = "Base64-encoded user data for EC2 instances"
+  type        = string
+  default     = ""
 }
 
 variable "web_instance_type" {
@@ -72,10 +66,22 @@ variable "db_instance_type" {
   default     = "t3.micro"
 }
 
-variable "user_data_base64" {
-  description = "Base64-encoded user data for EC2 instances"
-  type        = string
-  default     = ""
+variable "enable_nat" {
+  description = "Toggle NAT Gateway creation"
+  type        = bool
+  default     = false
+}
+
+variable "enable_alb_web" {
+  description = "Toggle public web-facing ALB"
+  type        = bool
+  default     = false
+}
+
+variable "enable_alb_app" {
+  description = "Toggle private app-facing ALB"
+  type        = bool
+  default     = false
 }
 
 variable "enable_ec2" {

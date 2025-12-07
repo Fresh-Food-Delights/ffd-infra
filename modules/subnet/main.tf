@@ -1,6 +1,15 @@
 # /modules/subnet/main.tf
 
-# Public Subnets (1 per AZ)
+terraform {
+  required_version = ">= 1.10"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
 resource "aws_subnet" "public" {
   for_each = var.public_subnet_cidrs
 
@@ -14,7 +23,6 @@ resource "aws_subnet" "public" {
   }
 }
 
-# Private Web Subnets (1 per AZ)
 resource "aws_subnet" "private_web" {
   for_each = var.private_web_subnet_cidrs
 
@@ -27,7 +35,6 @@ resource "aws_subnet" "private_web" {
   }
 }
 
-# Private App Subnets (1 per AZ)
 resource "aws_subnet" "private_app" {
   for_each = var.private_app_subnet_cidrs
 
@@ -40,7 +47,6 @@ resource "aws_subnet" "private_app" {
   }
 }
 
-# Private DB Subnets (1 per AZ)
 resource "aws_subnet" "private_db" {
   for_each = var.private_db_subnet_cidrs
 

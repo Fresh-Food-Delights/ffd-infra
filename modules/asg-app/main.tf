@@ -1,5 +1,15 @@
 # /modules/asg-app/main.tf
 
+terraform {
+  required_version = ">= 1.10"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
 resource "aws_launch_template" "this" {
   name_prefix   = "ffd-${var.environment}-app-"
   image_id      = var.ami_id
