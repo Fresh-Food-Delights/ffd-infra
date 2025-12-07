@@ -1,5 +1,15 @@
 # /modules/security/main.tf
 
+terraform {
+  required_version = ">= 1.10"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
 resource "aws_security_group" "this" {
   name        = "ffd-${var.environment}-${var.name}"
   description = var.description

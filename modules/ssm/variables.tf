@@ -1,32 +1,32 @@
 # /modules/ssm/variables.tf
 
 variable "environment" {
-  description = "Environment name (dev/test/prod)"
   type        = string
-}
-
-variable "vpc_id" {
-  description = "VPC ID to attach endpoints to"
-  type        = string
-}
-
-variable "subnet_ids" {
-  description = "List of private subnet IDs"
-  type        = list(string)
-}
-
-variable "security_group_ids" {
-  description = "Security groups for the VPC endpoints"
-  type        = list(string)
+  description = "Environment name (dev, test, prod)"
 }
 
 variable "region" {
-  description = "AWS region"
   type        = string
+  description = "AWS region for the SSM VPC endpoints"
+}
+
+variable "vpc_id" {
+  type        = string
+  description = "VPC ID where the SSM VPC endpoints will be created"
+}
+
+variable "subnet_ids" {
+  type        = list(string)
+  description = "Private subnet IDs for the SSM interface endpoints"
+}
+
+variable "security_group_ids" {
+  type        = list(string)
+  description = "Security group IDs applied to the interface endpoints"
 }
 
 variable "enable" {
-  description = "Toggle creation of SSM endpoints"
   type        = bool
-  default     = false
+  description = "Whether to create the SSM VPC endpoints"
+  default     = true
 }

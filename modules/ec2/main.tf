@@ -1,5 +1,15 @@
 # /modules/ec2/main.tf
 
+terraform {
+  required_version = ">= 1.10"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
 resource "aws_iam_role" "ssm" {
   count = var.enable ? 1 : 0
   name  = "ffd-${var.environment}-${var.name}-ssm-role"
@@ -41,13 +51,11 @@ resource "aws_instance" "this" {
   key_name                    = var.key_name
   iam_instance_profile        = aws_iam_instance_profile.ssm[0].name
 
-  tags = merge(
-    {
-      Name        = "ffd-${var.environment}-${var.name}"
-      Environment = var.environment
-    },
-    var.tags
-  )
+  tags = {
+    Name        = "ffd-${var.environment}-${var.name}"
+    Environment = var.environment
+    Tier        = var.tier
+  }
 
   lifecycle {
     create_before_destroy = true

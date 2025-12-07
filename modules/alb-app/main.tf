@@ -1,5 +1,15 @@
 # /modules/alb-app/main.tf
 
+terraform {
+  required_version = ">= 1.10"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
 resource "aws_lb" "this" {
   count              = var.enable ? 1 : 0
   name               = "ffd-${var.environment}-app-alb"

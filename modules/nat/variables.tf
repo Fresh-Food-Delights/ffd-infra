@@ -1,17 +1,17 @@
 # /modules/nat/variables.tf
 
 variable "environment" {
-  description = "Environment name (e.g. dev, test, prod)"
+  description = "Deployment environment (dev, test, prod)"
   type        = string
 }
 
 variable "public_subnet_ids" {
-  description = "Map of AZs to public subnet IDs where NAT Gateways will be deployed"
+  description = "Map of public subnet IDs keyed by AZ (e.g., us-east-1a)"
   type        = map(string)
 }
 
 variable "enable" {
-  description = "Whether to enable NAT Gateway deployment"
+  description = "Whether to create NAT gateways"
   type        = bool
   default     = false
 }

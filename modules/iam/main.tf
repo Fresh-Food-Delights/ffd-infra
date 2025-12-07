@@ -1,5 +1,15 @@
 # /modules/iam/main.tf
 
+terraform {
+  required_version = ">= 1.10"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
 resource "aws_iam_group" "it_admin_group" {
   name = "ffd-aws-it-admin-${var.environment}-7714022395766"
 }

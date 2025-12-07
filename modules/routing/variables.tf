@@ -1,99 +1,48 @@
 # /modules/routing/variables.tf
 
 variable "environment" {
-  description = "Environment name (dev, test, prod)"
   type        = string
+  description = "Environment name (dev/test/prod)"
 }
 
 variable "vpc_id" {
-  description = "VPC ID for routing"
   type        = string
+  description = "VPC ID"
 }
 
 variable "internet_gateway_id" {
-  description = "Internet Gateway ID for public tier routing"
+  description = "ID of the Internet Gateway used for public route table default routes"
   type        = string
-  default     = null
-}
-
-variable "enable_public_internet" {
-  description = "Whether to allow public tier outbound access (via IGW)"
-  type        = bool
-  default     = false
-}
-
-variable "enable_nat_gateway" {
-  description = "Whether to create NAT routes for private web tier"
-  type        = bool
-  default     = false
 }
 
 variable "nat_gateway_ids" {
-  description = "Map of AZ to NAT Gateway IDs for private web tier"
-  type        = map(string)
-  default     = {}
+  description = "List of NAT gateway IDs to use for private web egress"
+  type        = list(string)
+  default     = []
 }
 
-# Subnet-to-Route Table Associations
+variable "enable_nat_gateway" {
+  type        = bool
+  description = "Whether to use NAT for web tier outbound"
+  default     = false
+}
+
 variable "public_subnet_ids" {
-  description = "Map of public subnet IDs per AZ"
   type        = map(string)
+  description = "Map of AZ -> public subnet IDs"
 }
 
 variable "private_web_subnet_ids" {
-  description = "Map of private web subnet IDs per AZ"
   type        = map(string)
+  description = "Map of AZ -> private web subnet IDs"
 }
 
 variable "private_app_subnet_ids" {
-  description = "Map of private app subnet IDs per AZ"
   type        = map(string)
+  description = "Map of AZ -> private app subnet IDs"
 }
 
 variable "private_db_subnet_ids" {
-  description = "Map of private db subnet IDs per AZ"
   type        = map(string)
-}
-
-# Optional VPC Endpoint IDs
-variable "vpce_s3_id" {
-  description = "VPC endpoint ID for S3"
-  type        = string
-  default     = null
-}
-
-variable "vpce_dynamodb_id" {
-  description = "VPC endpoint ID for DynamoDB"
-  type        = string
-  default     = null
-}
-
-variable "vpce_ssm_id" {
-  description = "VPC endpoint ID for SSM"
-  type        = string
-  default     = null
-}
-
-variable "vpce_secretsmanager_id" {
-  description = "VPC endpoint ID for Secrets Manager"
-  type        = string
-  default     = null
-}
-
-variable "vpce_kms_id" {
-  description = "VPC endpoint ID for KMS"
-  type        = string
-  default     = null
-}
-
-variable "vpce_ssmmessages_id" {
-  description = "VPC endpoint ID for SSM Messages"
-  type        = string
-  default     = null
-}
-
-variable "vpce_ec2messages_id" {
-  description = "VPC endpoint ID for EC2 Messages"
-  type        = string
-  default     = null
+  description = "Map of AZ -> private db subnet IDs"
 }
