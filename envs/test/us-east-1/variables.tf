@@ -1,8 +1,8 @@
 # /envs/test/us-east-1/variables.tf
 
 variable "account_id" {
-  type        = string
   description = "AWS account ID used in S3 bucket naming and policies"
+  type        = string
   default     = "771402395766"
 }
 
@@ -66,6 +66,42 @@ variable "db_instance_type" {
   default     = "t3.micro"
 }
 
+variable "enable_global_table" {
+  description = "Toggle DynamoDB Global Table creation"
+  type        = bool
+  default     = false
+}
+
+variable "replica_regions" {
+  type        = list(string)
+  description = "DynamoDB global table replica regions"
+  default     = []
+}
+
+variable "db_username" {
+  type        = string
+  description = "DB username for this environment"
+  default     = "ffd-app-db-master"
+}
+
+variable "multi_az" {
+  description = "Toggle multi-az creation"
+  type        = bool
+  default     = false
+}
+
+variable "is_replica" {
+  description = "Toggle multi-az creation"
+  type        = bool
+  default     = false
+}
+
+variable "primary_instance_arn" {
+  type        = string
+  description = "ARN of primary RDS instance (from us-east-1)"
+  default     = ""
+}
+
 variable "enable_nat" {
   description = "Toggle NAT Gateway creation"
   type        = bool
@@ -92,6 +128,12 @@ variable "enable_ec2" {
 
 variable "enable_ssm" {
   description = "Whether to enable SSM VPC endpoints"
+  type        = bool
+  default     = false
+}
+
+variable "enable_rds" {
+  description = "Toggle RDS instance creation"
   type        = bool
   default     = false
 }

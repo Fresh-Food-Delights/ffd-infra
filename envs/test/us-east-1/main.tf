@@ -27,13 +27,11 @@ module "vpc_endpoints" {
   region             = var.region
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = values(module.subnets.private_app_subnet_ids)
-
   private_route_table_ids = [
     module.routing.private_web_route_table_id,
     module.routing.private_app_route_table_id,
     module.routing.private_db_route_table_id,
   ]
-
   security_group_ids = [module.security_internal.security_group_id]
 }
 
@@ -292,31 +290,33 @@ module "alb_app" {
 }
 
 module "asg_web" {
-  source             = "../../../modules/asg-web"
-  environment        = var.environment
-  subnet_ids         = values(module.subnets.private_web_subnet_ids)
-  security_group_ids = [module.security_web.security_group_id]
-  target_group_arn   = module.alb_web.target_group_arn
-  ami_id             = var.ami_id_web["${var.region}"]
-  instance_type      = var.web_instance_type
-  user_data_base64   = var.user_data_base64
-  desired_capacity   = 0
-  min_size           = 0
-  max_size           = 0
+  source               = "../../../modules/asg-web"
+  environment          = var.environment
+  subnet_ids           = values(module.subnets.private_web_subnet_ids)
+  security_group_ids   = [module.security_web.security_group_id]
+  target_group_arn     = module.alb_web.target_group_arn
+  ami_id               = var.ami_id_web["${var.region}"]
+  instance_type        = var.web_instance_type
+  user_data_base64     = var.user_data_base64
+  iam_instance_profile = module.iam.web_instance_profile_name
+  desired_capacity     = 0
+  min_size             = 0
+  max_size             = 0
 }
 
 module "asg_app" {
-  source             = "../../../modules/asg-app"
-  environment        = var.environment
-  subnet_ids         = values(module.subnets.private_app_subnet_ids)
-  security_group_ids = [module.security_app.security_group_id]
-  target_group_arn   = module.alb_app.target_group_arn
-  ami_id             = var.ami_id_app["${var.region}"]
-  instance_type      = var.app_instance_type
-  user_data_base64   = var.user_data_base64
-  desired_capacity   = 0
-  min_size           = 0
-  max_size           = 0
+  source               = "../../../modules/asg-app"
+  environment          = var.environment
+  subnet_ids           = values(module.subnets.private_app_subnet_ids)
+  security_group_ids   = [module.security_app.security_group_id]
+  target_group_arn     = module.alb_app.target_group_arn
+  ami_id               = var.ami_id_app["${var.region}"]
+  instance_type        = var.app_instance_type
+  user_data_base64     = var.user_data_base64
+  iam_instance_profile = module.iam.app_instance_profile_name
+  desired_capacity     = 0
+  min_size             = 0
+  max_size             = 0
 }
 
 module "ec2" {
@@ -343,26 +343,58 @@ module "ssm" {
 
 module "web_s3_bucket" {
   source      = "../../../modules/s3"
-  account_id  = var.account_id
   environment = var.environment
   region      = var.region
   tier        = "web"
+  account_id  = var.account_id
   bucket_name = "ffd-data-web-${var.environment}-${var.account_id}-${var.region}"
 }
 
 module "app_s3_bucket" {
   source      = "../../../modules/s3"
-  account_id  = var.account_id
   environment = var.environment
   region      = var.region
   tier        = "app"
+  account_id  = var.account_id
   bucket_name = "ffd-data-app-${var.environment}-${var.account_id}-${var.region}"
 }
 
-module "dynamodb" {
+module "db_secrets" {
+  source      = "../../../modules/db_secrets"
+  environment = var.environment
+  region      = var.region
+  db_username = var.db_username
+}
+
+module "rds" {
+  source                = "../../../modules/rds"
+  environment           = var.environment
+  region                = var.region
+  tier                  = "db"
+  db_instance_type      = var.db_instance_type
+  db_subnet_ids         = values(module.subnets.private_db_subnet_ids)
+  db_security_group_ids = [module.security_db.security_group_id]
+  multi_az              = var.multi_az
+  is_replica            = var.is_replica
+
+  db_username = "${var.db_username}-${var.environment}"
+  enable      = var.enable_rds
+}
+
+module "app_sessions_table" {
   source              = "../../../modules/dynamodb"
   environment         = var.environment
   region              = var.region
-  enable_global_table = false
-  replica_regions     = []
+  enable_global_table = var.enable_global_table
+  replica_regions     = var.replica_regions
+}
+
+module "iam" {
+  source             = "../../../modules/iam"
+  environment        = var.environment
+  account_id         = var.account_id
+  web_bucket_arn     = module.web_s3_bucket.bucket_arn
+  app_bucket_arn     = module.app_s3_bucket.bucket_arn
+  session_table_arn  = module.app_sessions_table.table_arn
+  secretsmanager_arn = module.db_secrets.secret_arn
 }

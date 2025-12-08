@@ -12,7 +12,6 @@ terraform {
 
 locals {
   table_name = var.table_name != "" ? var.table_name : "ffd-sessions-${var.environment}"
-
   common_tags = {
     Environment = var.environment
     Service     = "ffd"
@@ -56,6 +55,14 @@ resource "aws_dynamodb_table" "sessions" {
     content {
       region_name = replica.value
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      stream_enabled,
+      stream_view_type,
+      stream_arn,
+    ]
   }
 
   tags = local.common_tags
