@@ -3,13 +3,13 @@
 variable "environment" {
   type        = string
   description = "Environment name (dev, test, prod)"
-  default = "dev"
+  default     = "dev"
 }
 
 variable "region" {
   description = "AWS region (e.g., us-east-1)"
   type        = string
-  default = "us-east-1"
+  default     = "us-east-1"
 }
 
 variable "tier" {
@@ -41,4 +41,10 @@ variable "session_table_arn" {
 variable "secretsmanager_arn" {
   type        = string
   description = "ARN or ARN prefix of Secrets Manager secret for DB creds"
+}
+
+variable "enable_ssm" {
+  description = "Enable SSM interface endpoints (ssm, ssmmessages, ec2messages)"
+  type        = bool
+  default     = false
 }

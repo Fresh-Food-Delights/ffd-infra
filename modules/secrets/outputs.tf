@@ -1,4 +1,4 @@
-# /modules/db_secretss/outputs.tf
+# /modules/secrets/outputs.tf
 
 output "secret_arn" {
   description = "ARN of the DB credentials secret"

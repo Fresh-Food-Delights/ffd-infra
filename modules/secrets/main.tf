@@ -1,4 +1,4 @@
-# /modules/db_secretss/main.tf
+# /modules/secrets/main.tf
 
 terraform {
   required_version = ">= 1.10"
@@ -15,7 +15,7 @@ terraform {
 }
 
 locals {
-  secret_name = var.secret_name != "" ? var.secret_name : "ffd-db-credentials-${var.environment}"
+  secret_name = var.secret_name != "" ? var.secret_name : "ffd-db-credentials-${var.environment}-${var.region}"
 }
 
 resource "random_password" "app" {
@@ -39,4 +39,20 @@ resource "aws_secretsmanager_secret_version" "db" {
     username = var.db_username
     password = random_password.app.result
   })
+}
+
+resource "aws_vpc_endpoint" "secretsmanager" {
+  count               = var.enable_rds ? 1 : 0
+  vpc_id              = var.vpc_id
+  service_name        = "com.amazonaws.${var.region}.secretsmanager"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = var.subnet_ids
+  security_group_ids  = var.security_group_ids
+  private_dns_enabled = true
+  tags = {
+    Environment = var.environment
+    Region      = var.region
+    Tier        = "app"
+    Name        = "ffd-${var.environment}-vpce-secretsmanager"
+  }
 }
