@@ -145,6 +145,18 @@ resource "aws_iam_instance_profile" "app_instance_profile" {
   role = aws_iam_role.app_instance_role.name
 }
 
+resource "aws_iam_role_policy_attachment" "web_ssm" {
+  count      = var.enable_ssm ? 1 : 0
+  role       = aws_iam_role.web_instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "app_ssm" {
+  count      = var.enable_ssm ? 1 : 0
+  role       = aws_iam_role.app_instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 resource "aws_iam_group" "it_admin_group" {
   name = "ffd-${var.environment}-aws-it-admin-${var.account_id}"
 }

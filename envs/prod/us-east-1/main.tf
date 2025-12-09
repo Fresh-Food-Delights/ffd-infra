@@ -24,18 +24,15 @@ module "vpc" {
 }
 
 module "vpc_endpoints" {
-  source             = "../../../modules/vpc_endpoints"
-  environment        = var.environment
-  region             = var.region
-  tier               = var.tier_aws
-  vpc_id             = module.vpc.vpc_id
-  private_subnet_ids = values(module.subnets.private_app_subnet_ids)
+  source      = "../../../modules/vpc_endpoints"
+  environment = var.environment
+  region      = var.region
+  tier        = var.tier_aws
+  vpc_id      = module.vpc.vpc_id
   private_route_table_ids = [
     module.routing.private_web_route_table_id,
     module.routing.private_app_route_table_id,
-    module.routing.private_db_route_table_id,
   ]
-  security_group_ids = [module.security_internal.security_group_id]
 }
 
 module "subnets" {
@@ -405,12 +402,16 @@ module "app_s3_bucket" {
   bucket_name = "ffd-data-app-${var.environment}-${var.account_id}-${var.region}"
 }
 
-module "db_secrets" {
-  source      = "../../../modules/db_secrets"
-  environment = var.environment
-  region      = var.region
-  tier        = var.tier_aws
-  db_username = var.db_username
+module "secrets" {
+  source             = "../../../modules/secrets"
+  environment        = var.environment
+  region             = var.region
+  tier               = var.tier_aws
+  vpc_id             = module.vpc.vpc_id
+  subnet_ids         = values(module.subnets.private_app_subnet_ids)
+  security_group_ids = [module.security_internal.security_group_id]
+  db_username        = "${var.db_username}-${var.environment}"
+  enable_rds         = var.enable_rds
 }
 
 module "rds" {
@@ -446,5 +447,5 @@ module "iam" {
   web_bucket_arn     = module.web_s3_bucket.bucket_arn
   app_bucket_arn     = module.app_s3_bucket.bucket_arn
   session_table_arn  = module.app_sessions_table.table_arn
-  secretsmanager_arn = module.db_secrets.secret_arn
+  secretsmanager_arn = module.secrets.secret_arn
 }

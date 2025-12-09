@@ -3,11 +3,13 @@
 variable "environment" {
   type        = string
   description = "Environment name (dev, test, prod)"
+  default     = "dev"
 }
 
 variable "region" {
   type        = string
   description = "AWS region for the SSM VPC endpoints"
+  default     = "us-east-1"
 }
 
 variable "tier" {
