@@ -1,4 +1,4 @@
-# /modules/nat/variables.tf
+# /modules/waf/variables.tf
 
 variable "environment" {
   type        = string
@@ -15,16 +15,11 @@ variable "region" {
 variable "tier" {
   description = "Label to identify the tier (e.g. web, app)"
   type        = string
-  default     = "public"
-}
-
-variable "public_subnet_ids" {
-  description = "Map of public subnet IDs keyed by AZ (e.g., us-east-1a)"
-  type        = map(string)
+  default     = "edge"
 }
 
 variable "enable" {
-  description = "Whether to create NAT gateways"
   type        = bool
+  description = "Toggle WAF Web ACL"
   default     = false
 }

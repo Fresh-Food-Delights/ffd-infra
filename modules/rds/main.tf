@@ -5,15 +5,8 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 6.25.0"
     }
-  }
-}
-
-locals {
-  common_tags = {
-    Environment = var.environment
-    Tier        = var.tier
   }
 }
 
@@ -21,26 +14,24 @@ resource "aws_db_subnet_group" "this" {
   count      = var.enable && !var.is_replica ? 1 : 0
   name       = "ffd-${var.environment}-db-subnets"
   subnet_ids = var.db_subnet_ids
-
-  tags = local.common_tags
+  tags = {
+    Environment = var.environment
+    Region      = var.region
+    Tier        = var.tier
+  }
 }
 
 resource "aws_db_instance" "primary" {
   count = var.enable && !var.is_replica ? 1 : 0
-
   identifier_prefix = "ffd-${var.environment}-postgres"
   engine            = "postgres"
   engine_version    = "18.1"
   instance_class    = var.db_instance_type
-
   allocated_storage = 20
   storage_type      = "gp3"
-
   db_name  = "ffd_app_db"
   username = "${var.db_username}-${var.environment}"
-
   manage_master_user_password = true
-
   multi_az                 = var.multi_az
   storage_encrypted        = true
   publicly_accessible      = false
@@ -49,16 +40,17 @@ resource "aws_db_instance" "primary" {
   apply_immediately        = true
   backup_retention_period  = 7
   delete_automated_backups = true
-
   vpc_security_group_ids = var.db_security_group_ids
   db_subnet_group_name   = aws_db_subnet_group.this[0].name
-
-  tags = local.common_tags
+  tags = {
+    Environment = var.environment
+    Region      = var.region
+    Tier        = var.tier
+  }
 }
 
 resource "aws_db_instance" "replica" {
   count = var.enable && var.is_replica ? 1 : 0
-
   engine               = "postgres"
   instance_class       = var.db_instance_type
   replicate_source_db  = var.primary_instance_arn
@@ -67,11 +59,12 @@ resource "aws_db_instance" "replica" {
   apply_immediately    = true
   deletion_protection  = false
   skip_final_snapshot  = true
-
   vpc_security_group_ids = var.db_security_group_ids
   db_subnet_group_name   = null
-
-  tags = merge(local.common_tags, {
-    Role = "read-replica"
-  })
+  tags = {
+    Environment = var.environment
+    Region      = var.region
+    Tier        = var.tier
+    Role        = "read-replica"
+  }
 }

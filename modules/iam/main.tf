@@ -5,20 +5,13 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 6.25.0"
     }
-  }
-}
-
-locals {
-  common_tags = {
-    Environment = var.environment
   }
 }
 
 resource "aws_iam_role" "web_instance_role" {
   name = "ffd-${var.environment}-web-ec2-role"
-
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -31,13 +24,15 @@ resource "aws_iam_role" "web_instance_role" {
       }
     ]
   })
-
-  tags = local.common_tags
+  tags = {
+    Environment = var.environment
+    Region      = var.region
+    Tier        = var.tier
+  }
 }
 
 resource "aws_iam_policy" "web_instance_policy" {
   name = "ffd-${var.environment}-web-ec2-policy"
-
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -77,7 +72,6 @@ resource "aws_iam_instance_profile" "web_instance_profile" {
 
 resource "aws_iam_role" "app_instance_role" {
   name = "ffd-${var.environment}-app-ec2-role"
-
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -90,13 +84,15 @@ resource "aws_iam_role" "app_instance_role" {
       }
     ]
   })
-
-  tags = local.common_tags
+  tags = {
+    Environment = var.environment
+    Region      = var.region
+    Tier        = var.tier
+  }
 }
 
 resource "aws_iam_policy" "app_instance_policy" {
   name = "ffd-${var.environment}-app-ec2-policy"
-
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [

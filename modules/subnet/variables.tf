@@ -1,12 +1,43 @@
 # /modules/subnet/variables.tf
 
-variable "vpc_id" {
-  description = "The ID of the VPC"
+variable "environment" {
   type        = string
+  description = "Environment name (dev, test, prod)"
+  default = "dev"
 }
 
-variable "environment" {
-  description = "Environment name (e.g., dev, test, prod)"
+variable "region" {
+  description = "AWS region (e.g., us-east-1)"
+  type        = string
+  default = "us-east-1"
+}
+
+variable "tier_public" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "public"
+}
+
+variable "tier_private-web" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "private-web"
+}
+
+variable "tier_private-app" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "private-app"
+}
+
+variable "tier_private-db" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "private-db"
+}
+
+variable "vpc_id" {
+  description = "The ID of the VPC"
   type        = string
 }
 

@@ -3,11 +3,19 @@
 variable "environment" {
   type        = string
   description = "Environment name (dev, test, prod)"
+  default = "dev"
 }
 
 variable "region" {
+  description = "AWS region (e.g., us-east-1)"
   type        = string
-  description = "Region where the table is managed"
+  default = "us-east-1"
+}
+
+variable "tier" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "aws"
 }
 
 variable "enable_global_table" {

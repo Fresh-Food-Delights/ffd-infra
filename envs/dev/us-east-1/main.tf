@@ -6,7 +6,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 6.25.0"
     }
   }
 }
@@ -18,6 +18,8 @@ provider "aws" {
 module "vpc" {
   source      = "../../../modules/vpc"
   environment = var.environment
+  region      = var.region
+  tier        = var.tier_aws
   vpc_cidr    = "10.0.0.0/16"
 }
 
@@ -25,6 +27,7 @@ module "vpc_endpoints" {
   source             = "../../../modules/vpc_endpoints"
   environment        = var.environment
   region             = var.region
+  tier               = var.tier_aws
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = values(module.subnets.private_app_subnet_ids)
   private_route_table_ids = [
@@ -38,6 +41,7 @@ module "vpc_endpoints" {
 module "subnets" {
   source                   = "../../../modules/subnet"
   environment              = var.environment
+  region                   = var.region
   vpc_id                   = module.vpc.vpc_id
   public_subnet_cidrs      = { "${var.region}a" = "10.0.1.0/24", "${var.region}b" = "10.0.2.0/24" }
   private_web_subnet_cidrs = { "${var.region}a" = "10.0.11.0/24", "${var.region}b" = "10.0.12.0/24" }
@@ -48,6 +52,8 @@ module "subnets" {
 module "nat" {
   source            = "../../../modules/nat"
   environment       = var.environment
+  region            = var.region
+  tier              = var.tier_public
   public_subnet_ids = module.subnets.public_subnet_ids
   enable            = var.enable_nat
 }
@@ -55,6 +61,7 @@ module "nat" {
 module "routing" {
   source                 = "../../../modules/routing"
   environment            = var.environment
+  region                 = var.region
   vpc_id                 = module.vpc.vpc_id
   public_subnet_ids      = module.subnets.public_subnet_ids
   private_web_subnet_ids = module.subnets.private_web_subnet_ids
@@ -67,9 +74,11 @@ module "routing" {
 
 module "security_alb_web" {
   source      = "../../../modules/security"
+  environment = var.environment
+  region      = var.region
+  tier        = var.tier_security
   name        = "alb-web"
   description = "Security group for Web tier ALB"
-  environment = var.environment
   vpc_id      = module.vpc.vpc_id
   ingress_rules = [
     {
@@ -100,9 +109,11 @@ module "security_alb_web" {
 
 module "security_alb_app" {
   source      = "../../../modules/security"
+  environment = var.environment
+  region      = var.region
+  tier        = var.tier_security
   name        = "alb-app"
   description = "Security group for App tier ALB"
-  environment = var.environment
   vpc_id      = module.vpc.vpc_id
   ingress_rules = [
     {
@@ -133,9 +144,11 @@ module "security_alb_app" {
 
 module "security_web" {
   source      = "../../../modules/security"
+  environment = var.environment
+  region      = var.region
+  tier        = var.tier_security
   name        = "web"
   description = "Web tier SG"
-  environment = var.environment
   vpc_id      = module.vpc.vpc_id
   ingress_rules = [
     {
@@ -166,9 +179,11 @@ module "security_web" {
 
 module "security_app" {
   source      = "../../../modules/security"
+  environment = var.environment
+  region      = var.region
+  tier        = var.tier_security
   name        = "app"
   description = "App tier SG"
-  environment = var.environment
   vpc_id      = module.vpc.vpc_id
   ingress_rules = [
     {
@@ -199,9 +214,11 @@ module "security_app" {
 
 module "security_db" {
   source      = "../../../modules/security"
+  environment = var.environment
+  region      = var.region
+  tier        = var.tier_security
   name        = "db"
   description = "DB tier SG"
-  environment = var.environment
   vpc_id      = module.vpc.vpc_id
   ingress_rules = [
     {
@@ -232,9 +249,11 @@ module "security_db" {
 
 module "security_internal" {
   source      = "../../../modules/security"
+  environment = var.environment
+  region      = var.region
+  tier        = var.tier_security
   name        = "internal"
   description = "Internal access SG (e.g., VPC endpoints)"
-  environment = var.environment
   vpc_id      = module.vpc.vpc_id
   ingress_rules = [
     {
@@ -266,7 +285,8 @@ module "security_internal" {
 module "alb_web" {
   source             = "../../../modules/alb-web"
   environment        = var.environment
-  tier               = "web"
+  region             = var.region
+  tier               = var.tier_private-web
   internal           = false
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = values(module.subnets.public_subnet_ids)
@@ -279,7 +299,8 @@ module "alb_web" {
 module "alb_app" {
   source             = "../../../modules/alb-app"
   environment        = var.environment
-  tier               = "app"
+  region             = var.region
+  tier               = var.tier_private-app
   internal           = true
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = values(module.subnets.private_web_subnet_ids)
@@ -289,9 +310,30 @@ module "alb_app" {
   enable             = var.enable_alb_app
 }
 
+module "waf" {
+  source      = "../../../modules/waf"
+  environment = var.environment
+  region      = var.region
+  tier        = var.tier_edge
+  enable      = var.enable_edge
+}
+
+module "cloudfront" {
+  source                    = "../../../modules/cloudfront"
+  environment               = var.environment
+  region                    = var.region
+  tier                      = var.tier_edge
+  origin_domain_name        = module.alb_web.alb_dns_name
+  geo_restriction_countries = var.geo_restriction_countries
+  web_acl_arn               = module.waf.web_acl_arn
+  enable                    = var.enable_edge
+}
+
 module "asg_web" {
   source               = "../../../modules/asg-web"
   environment          = var.environment
+  region               = var.region
+  tier                 = var.tier_private-web
   subnet_ids           = values(module.subnets.private_web_subnet_ids)
   security_group_ids   = [module.security_web.security_group_id]
   target_group_arn     = module.alb_web.target_group_arn
@@ -307,6 +349,8 @@ module "asg_web" {
 module "asg_app" {
   source               = "../../../modules/asg-app"
   environment          = var.environment
+  region               = var.region
+  tier                 = var.tier_private-app
   subnet_ids           = values(module.subnets.private_app_subnet_ids)
   security_group_ids   = [module.security_app.security_group_id]
   target_group_arn     = module.alb_app.target_group_arn
@@ -322,7 +366,8 @@ module "asg_app" {
 module "ec2" {
   source             = "../../../modules/ec2"
   environment        = var.environment
-  tier               = "web"
+  region             = var.region
+  tier               = var.tier_private-web
   ami_id             = var.ami_id_app["${var.region}"]
   instance_type      = var.ec2_instance_type
   name               = "ami-builder"
@@ -335,6 +380,7 @@ module "ssm" {
   source             = "../../../modules/ssm"
   environment        = var.environment
   region             = var.region
+  tier               = var.tier_aws
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = values(module.subnets.private_app_subnet_ids)
   security_group_ids = [module.security_internal.security_group_id]
@@ -345,7 +391,7 @@ module "web_s3_bucket" {
   source      = "../../../modules/s3"
   environment = var.environment
   region      = var.region
-  tier        = "web"
+  tier        = var.tier_aws
   account_id  = var.account_id
   bucket_name = "ffd-data-web-${var.environment}-${var.account_id}-${var.region}"
 }
@@ -354,7 +400,7 @@ module "app_s3_bucket" {
   source      = "../../../modules/s3"
   environment = var.environment
   region      = var.region
-  tier        = "app"
+  tier        = var.tier_aws
   account_id  = var.account_id
   bucket_name = "ffd-data-app-${var.environment}-${var.account_id}-${var.region}"
 }
@@ -363,6 +409,7 @@ module "db_secrets" {
   source      = "../../../modules/db_secrets"
   environment = var.environment
   region      = var.region
+  tier        = var.tier_aws
   db_username = var.db_username
 }
 
@@ -370,7 +417,7 @@ module "rds" {
   source                = "../../../modules/rds"
   environment           = var.environment
   region                = var.region
-  tier                  = "db"
+  tier                  = var.tier_private-db
   db_instance_type      = var.db_instance_type
   db_subnet_ids         = values(module.subnets.private_db_subnet_ids)
   db_security_group_ids = [module.security_db.security_group_id]
@@ -385,6 +432,7 @@ module "app_sessions_table" {
   source              = "../../../modules/dynamodb"
   environment         = var.environment
   region              = var.region
+  tier                = var.tier_aws
   enable_global_table = var.enable_global_table
   replica_regions     = var.replica_regions
 }
@@ -392,6 +440,8 @@ module "app_sessions_table" {
 module "iam" {
   source             = "../../../modules/iam"
   environment        = var.environment
+  region             = var.region
+  tier               = var.tier_iam
   account_id         = var.account_id
   web_bucket_arn     = module.web_s3_bucket.bucket_arn
   app_bucket_arn     = module.app_s3_bucket.bucket_arn

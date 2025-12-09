@@ -3,11 +3,19 @@
 variable "environment" {
   type        = string
   description = "Environment name (dev, test, prod)"
+  default = "dev"
 }
 
 variable "region" {
+  description = "AWS region (e.g., us-east-1)"
   type        = string
-  description = "AWS region for this environment"
+  default = "us-east-1"
+}
+
+variable "tier" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "aws"
 }
 
 variable "db_username" {

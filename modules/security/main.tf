@@ -5,7 +5,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 6.25.0"
     }
   }
 }
@@ -14,7 +14,6 @@ resource "aws_security_group" "this" {
   name        = "ffd-${var.environment}-${var.name}"
   description = var.description
   vpc_id      = var.vpc_id
-
   dynamic "ingress" {
     for_each = var.ingress_rules
     content {
@@ -26,7 +25,6 @@ resource "aws_security_group" "this" {
       description     = lookup(ingress.value, "description", null)
     }
   }
-
   dynamic "egress" {
     for_each = var.egress_rules
     content {
@@ -38,9 +36,10 @@ resource "aws_security_group" "this" {
       description     = lookup(egress.value, "description", null)
     }
   }
-
   tags = {
-    Name        = "ffd-${var.environment}-${var.name}"
     Environment = var.environment
+    Region      = var.region
+    Tier        = var.tier
+    Name        = "ffd-${var.environment}-${var.name}"
   }
 }

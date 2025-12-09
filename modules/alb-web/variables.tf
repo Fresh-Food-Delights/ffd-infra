@@ -2,7 +2,20 @@
 
 variable "environment" {
   type        = string
-  description = "Deployment environment (e.g., dev, test, prod)"
+  description = "Environment name (dev, test, prod)"
+  default = "dev"
+}
+
+variable "region" {
+  description = "AWS region (e.g., us-east-1)"
+  type        = string
+  default = "us-east-1"
+}
+
+variable "tier" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "private-web"
 }
 
 variable "vpc_id" {
@@ -33,11 +46,6 @@ variable "internal" {
 variable "target_port" {
   description = "Port for the target group and listener"
   type        = number
-}
-
-variable "tier" {
-  description = "Label to identify the tier (e.g. web, app)"
-  type        = string
 }
 
 variable "enable" {
