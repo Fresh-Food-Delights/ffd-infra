@@ -5,7 +5,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 6.25.0"
     }
   }
 }
@@ -19,9 +19,10 @@ resource "aws_vpc_endpoint" "ssm" {
   security_group_ids  = var.security_group_ids
   private_dns_enabled = true
   tags                = {
-    Name        = "ffd-${var.environment}-ssm-vpce"
     Environment = var.environment
-    Tier        = "management"
+    Region      = var.region
+    Tier        = var.tier
+    Name        = "ffd-${var.environment}-ssm-vpce"
   }
 }
 
@@ -34,9 +35,10 @@ resource "aws_vpc_endpoint" "ssm_messages" {
   security_group_ids  = var.security_group_ids
   private_dns_enabled = true
   tags                = {
-    Name        = "ffd-${var.environment}-ssmmessages-vpce"
     Environment = var.environment
-    Tier        = "management"
+    Region      = var.region
+    Tier        = var.tier
+    Name        = "ffd-${var.environment}-ssmmessages-vpce"
   }
 }
 
@@ -49,9 +51,10 @@ resource "aws_vpc_endpoint" "ec2_messages" {
   security_group_ids  = var.security_group_ids
   private_dns_enabled = true
   tags                = {
-    Name        = "ffd-${var.environment}-ec2messages-vpce"
     Environment = var.environment
-    Tier        = "management"
+    Region      = var.region
+    Tier        = var.tier
+    Name        = "ffd-${var.environment}-ec2messages-vpce"
   }
 }
 
@@ -78,7 +81,6 @@ resource "aws_iam_role_policy_attachment" "ssm_core" {
 
 resource "aws_iam_instance_profile" "ssm_instance_profile" {
   count = var.enable ? 1 : 0
-
   name = "ffd-${var.environment}-ssm-instance-profile"
   role = aws_iam_role.ssm_instance_role[0].name
 }

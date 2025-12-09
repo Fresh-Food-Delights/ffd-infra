@@ -1,7 +1,7 @@
 # /envs/prod/us-west-1/variables.tf
 
 variable "account_id" {
-  description = "AWS account ID used in S3 bucket naming and policies"
+  description = "AWS account ID"
   type        = string
   default     = "771402395766"
 }
@@ -16,6 +16,60 @@ variable "region" {
   description = "AWS region to deploy resources into"
   type        = string
   default     = "us-west-1"
+}
+
+variable "tier_edge" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "edge"
+}
+
+variable "tier_public" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "public"
+}
+
+variable "tier_private-web" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "private-web"
+}
+
+variable "tier_private-app" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "private-app"
+}
+
+variable "tier_private-db" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "private-db"
+}
+
+variable "tier_security" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "security"
+}
+
+variable "tier_iam" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "iam"
+}
+
+variable "tier_aws" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "aws"
+}
+
+variable "geo_restriction_countries" {
+  description = "Allowed countries for CloudFront geo restriction"
+  type        = list(string)
+  default     = ["US"]
 }
 
 variable "ami_id_web" {
@@ -101,6 +155,12 @@ variable "primary_instance_arn" {
   description = "ARN of primary RDS instance (from us-east-1)"
   default     = ""
 }
+#=================================================================#
+variable "enable_edge" {
+  description = "Toggle CloudFront + WAF"
+  type        = bool
+  default     = false
+}
 
 variable "enable_nat" {
   description = "Toggle NAT Gateway creation"
@@ -137,3 +197,4 @@ variable "enable_rds" {
   type        = bool
   default     = false
 }
+#=================================================================#

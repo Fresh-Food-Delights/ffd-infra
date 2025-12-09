@@ -10,6 +10,12 @@ variable "region" {
   description = "AWS region for the SSM VPC endpoints"
 }
 
+variable "tier" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "aws"
+}
+
 variable "vpc_id" {
   type        = string
   description = "VPC ID where the SSM VPC endpoints will be created"

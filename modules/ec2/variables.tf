@@ -1,12 +1,25 @@
 # /modules/ec2/variables.tf
 
-variable "name" {
-  description = "Instance name suffix"
+variable "environment" {
   type        = string
+  description = "Environment name (dev, test, prod)"
+  default = "dev"
 }
 
-variable "environment" {
-  description = "Environment tag (e.g. dev, prod)"
+variable "region" {
+  description = "AWS region (e.g., us-east-1)"
+  type        = string
+  default = "us-east-1"
+}
+
+variable "tier" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "private-web"
+}
+
+variable "name" {
+  description = "Instance name suffix"
   type        = string
 }
 
@@ -47,11 +60,6 @@ variable "tags" {
   description = "Additional tags for the EC2 instance"
   type        = map(string)
   default     = {}
-}
-
-variable "tier" {
-  description = "Label to identify the tier (e.g. web, app)"
-  type        = string
 }
 
 variable "enable" {

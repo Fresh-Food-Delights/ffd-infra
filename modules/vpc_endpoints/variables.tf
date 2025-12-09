@@ -1,17 +1,25 @@
 # /modules/vpc_endpoints/variables.tf
 
-variable "vpc_id" {
-  description = "VPC ID where endpoints will be created"
+variable "environment" {
   type        = string
+  description = "Environment name (dev, test, prod)"
+  default = "dev"
 }
 
 variable "region" {
   description = "AWS region (e.g., us-east-1)"
   type        = string
+  default = "us-east-1"
 }
 
-variable "environment" {
-  description = "Environment name (dev, test, prod)"
+variable "tier" {
+  description = "Label to identify the tier (e.g. web, app)"
+  type        = string
+  default     = "aws"
+}
+
+variable "vpc_id" {
+  description = "VPC ID where endpoints will be created"
   type        = string
 }
 

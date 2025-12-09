@@ -5,7 +5,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 6.25.0"
     }
   }
 }
@@ -13,7 +13,6 @@ terraform {
 resource "aws_iam_role" "ssm" {
   count = var.enable ? 1 : 0
   name  = "ffd-${var.environment}-${var.name}-ssm-role"
-
   assume_role_policy = jsonencode({
     Version   = "2012-10-17",
     Statement = [
@@ -42,7 +41,6 @@ resource "aws_iam_instance_profile" "ssm" {
 
 resource "aws_instance" "this" {
   count = var.enable ? 1 : 0
-
   ami                         = var.ami_id
   instance_type               = var.instance_type
   subnet_id                   = var.subnet_id
@@ -50,13 +48,12 @@ resource "aws_instance" "this" {
   associate_public_ip_address = var.associate_public_ip
   key_name                    = var.key_name
   iam_instance_profile        = aws_iam_instance_profile.ssm[0].name
-
   tags = {
-    Name        = "ffd-${var.environment}-${var.name}"
     Environment = var.environment
+    Region      = var.region
     Tier        = var.tier
+    Name        = "ffd-${var.environment}-${var.name}"
   }
-
   lifecycle {
     create_before_destroy = true
   }
