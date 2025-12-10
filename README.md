@@ -13,111 +13,233 @@ Infrastructure-as-Code repository for the Fresh Food Delights mock organization.
 
 ## Key AWS Resources Deployed
 
-| Resource Type       | Purpose                                                                  |
-|---------------------|--------------------------------------------------------------------------|
-| S3 Buckets          | `ffd-tfstate-*`, `ffd-artifacts-*`, `ffd-logs-*` for state, builds, logs |
-| DynamoDB            | `ffd-tf-lock` for Terraform backend state locking                        |
-| IAM                 | OIDC trust for GitHub Actions + scoped policies                          |
-| VPC + Subnets       | Isolated tiers for Web, App, and DB in each environment                  |
-| ALB, EC2, RDS       | Core infrastructure components for application and DB tiers              |
-| VPC Endpoints       | S3, DynamoDB, Secrets Manager, SSM, etc. with least privilege            |
-| Future:             | CloudFront, WAF, GuardDuty, CloudTrail, etc. (planned for deployment)    |
+| Resource Type       | Purpose                                                                                                                  |
+|---------------------|--------------------------------------------------------------------------------------------------------------------------|
+| S3 Buckets          | `ffd-tfstate-*`, `ffd-artifacts-*`, `ffd-logs-*` for state, builds, logs                                                 |
+| DynamoDB            | `ffd-tf-lock` for Terraform backend state locking                                                                        |
+| IAM                 | OIDC trust for GitHub Actions + scoped policies                                                                          |
+| VPC + Subnets       | Isolated tiers for Web, App, and DB in each environment                                                                  |
+| ALB, EC2, RDS       | Core infra components defined in code for web, app, and DB tiers; scaled to zero or disabled by default for cost control |
+| VPC Endpoints       | Gateway endpoints for S3 and DynamoDB; interface endpoints for SSM/Secrets defined in modules                            |
+| CloudFront + WAF    | Edge and L7 protection modules defined in code; disabled by default until explicitly enabled                             |
+| Future:             | GuardDuty, CloudTrail, and additional security services (planned for deployment)                                         |
 
 ## 🗂 Repository Structure
 
 ```
 FFD-INFRA/
-├── .github/             # GitHub Actions workflows
+├── .github/                     # GitHub Actions workflows
 │   └── workflows/
 │       └── terraform.yml
-├── diagram/             # Reference architecture visuals
+├── diagram/                     # Reference architecture visuals
 │   └── diagram.jpg
-├── envs/                # Environment-specific configuration
+├── envs/                        # Environment- and region-specific configuration
 │   ├── dev/
+│   │   └── us-east-1/
+│   │       ├── backend.hcl
+│   │       ├── main.tf
+│   │       ├── outputs.tf
+│   │       ├── tfplan
+│   │       └── variables.tf
 │   ├── test/
+│   │   └── us-east-1/
+│   │       ├── backend.hcl
+│   │       ├── main.tf
+│   │       ├── outputs.tf
+│   │       ├── tfplan
+│   │       └── variables.tf
 │   └── prod/
-├── modules/             # All Terraform modules used by environments
-│   ├── alb-app/         # Private ALB targeting app tier (8080)
-│   ├── alb-web/         # Public ALB targeting web tier (80)
-│   ├── asg-app/         # App-tier Auto Scaling Group
-│   ├── asg-web/         # Web-tier Auto Scaling Group
-│   ├── ec2/             # Reusable EC2 launch configuration (free tier)
-│   ├── iam/             # IAM role/policy bindings (placeholder)
-│   ├── nat/             # AZ-mapped NAT gateways
-│   ├── rds/             # Placeholder for PostgreSQL or read replica module
-│   ├── routing/         # Route tables per subnet tier (no broad local)
-│   ├── security/        # Security groups with customizable rules
-│   ├── ssm/             # SSM session support and output for EC2 targets
-│   ├── subnet/          # Tiered subnet layout (per AZ)
-│   ├── vpc/             # Core VPC and IGW creation
-│   ├── vpc_endpoints/   # S3, DynamoDB, SSM, Secrets, KMS endpoints
-│   └── waf/             # Placeholder for AWS WAF module
-├── policies/            # S3 and IAM policy JSON files
+│       ├── us-east-1/
+│       │   ├── backend.hcl
+│       │   ├── main.tf
+│       │   ├── outputs.tf
+│       │   ├── tfplan
+│       │   └── variables.tf
+│       └── us-west-1/
+│           ├── backend.hcl
+│           ├── main.tf
+│           ├── outputs.tf
+│           ├── tfplan
+│           └── variables.tf
+├── modules/                     # All Terraform modules used by environments
+│   ├── alb-app/                 # Internal ALB targeting app tier (8080)
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── alb-web/                 # Public ALB targeting web tier (80)
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── asg-app/                 # App-tier Auto Scaling Group
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── asg-web/                 # Web-tier Auto Scaling Group
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── cloudfront/              # Optional CloudFront distribution
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── dynamodb/                # Optional DynamoDB tables
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── ec2/                     # General-purpose EC2 launcher
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── iam/                     # IAM roles and policies
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── nat/                     # NAT gateways per AZ
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── rds/                     # RDS database provisioning
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── routing/                 # Route tables per subnet tier
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── s3/                      # S3 buckets (web data and app data)
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── secrets/                 # AWS Secrets Manager integration
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── security/                # Security group abstractions
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── ssm/                     # SSM activation and commands
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── subnet/                  # Tiered subnet layout (per AZ)
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── vpc/                     # Core VPC and IGW
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── vpc_endpoints/           # Gateway endpoints (S3 and DynamoDB)
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   └── waf/                     # AWS WAF Web ACLs
+│       ├── main.tf
+│       ├── outputs.tf
+│       └── variables.tf
+├── policies/                    # S3 and IAM policy JSON files
 │   ├── artifacts-policy.json
 │   ├── logs-policy.json
 │   ├── ownership.json
 │   ├── public-block.json
+│   ├── s3-policy-template.json
 │   ├── sse.json
 │   └── tfstate-policy.json
-├── backend.hcl          # Shared backend config for remote state
-├── providers.tf         # Terraform provider configuration
 ├── .gitignore
-└── README.md
+├── backend.hcl                  # Shared backend config for remote state
+├── providers.tf                 # Terraform provider configuration
+├── README.md
+└── tfplan                       # Root-level plan artifact
 ```
 
----
-
-## 🔧 Module Overview
-
-| Module         | Purpose                                                     |
-|----------------|-------------------------------------------------------------|
-| `alb-web`      | Public ALB for web tier (HTTP 80)                           |
-| `alb-app`      | Internal ALB for app tier (HTTP 8080)                       |
-| `asg-web`      | Auto Scaling Group for web-tier EC2                         |
-| `asg-app`      | Auto Scaling Group for app-tier EC2                         |
-| `ec2`          | General-purpose EC2 instance launcher                       |
-| `nat`          | One NAT gateway per AZ (disabled by default)                |
-| `routing`      | Custom route tables per subnet tier                         |
-| `security`     | Parameterized security group module                         |
-| `ssm`          | SSM activation and output capture for EC2 usage             |
-| `subnet`       | Public, private-web, private-app, and private-db subnets    |
-| `vpc`          | VPC creation and IGW                                        |
-| `vpc_endpoints`| Gateway and interface endpoints for AWS services            |
 
 ---
+
+## 🔧 Modules Overview
+
+All modules below are fully implemented in Terraform. Cost-driving resources (ASGs, RDS, NAT, CloudFront/WAF, etc.) are either scaled to `0/0/0` or disabled by default and can be enabled via variables when needed.
+
+| Modules         | Purpose                                                                                                   |
+|-----------------|-----------------------------------------------------------------------------------------------------------|
+| `alb-web`       | Public Application Load Balancer for web tier (HTTP 80) (disabled by default)                             |
+| `alb-app`       | Internal Application Load Balancer for app tier (HTTP 8080) (disabled by default)                         |
+| `asg-web`       | Auto Scaling Group for web-tier EC2 instances (desired/min/max = 0/0/0 by default)                        |
+| `asg-app`       | Auto Scaling Group for app-tier EC2 instances (desired/min/max = 0/0/0 by default)                        |
+| `cloudfront`    | Optional CloudFront distribution for edge caching and TLS termination (disabled by default)               |
+| `dynamodb`      | Optional DynamoDB tables for application state, locking, or auxiliary data                                |
+| `ec2`           | General-purpose EC2 used to build AMIs for non-internet-facing subnets (disabled by default)              |
+| `iam`           | IAM roles, instance profiles, and scoped policies for services                                            |
+| `nat`           | Optional NAT gateways (one per AZ) for private outbound access (disabled by default)                      |
+| `rds`           | Optional RDS database provisioning with subnet groups and security integration (disabled by default)      |
+| `routing`       | Custom route tables per subnet tier (public, web, app, db)                                                |
+| `s3`            | S3 buckets for assets, logs, backups, or Terraform state support                                          |
+| `secrets`       | Optional centralized Secrets Manager entries for app and database credentials (disabled by default)       |
+| `security`      | Parameterized security group module with tier-aware rules                                                 |
+| `ssm`           | Optional SSM enablement, instance registration, and command/log support (disabled by default)             |
+| `subnet`        | Public, private-web, private-app, and private-db subnet definitions                                       |
+| `vpc`           | VPC creation with CIDR allocation, IGW, and base networking                                               |
+| `vpc_endpoints` | Gateway endpoints for S3 and DynamoDB (always on); interface endpoints handled by `ssm`/`secrets` modules |
+| `waf`           | Optional AWS WAF rules and Web ACLs for ALB and CloudFront protection (disabled by default)               |
+
+---
+
+> Core environment modules: `vpc`, `subnet`, `routing`, `security`, `iam`, `s3`, and `vpc_endpoints`.  
+> All other modules are optional and disabled by default unless explicitly enabled via variables.
 
 ## Usage
 
-### Initial Setup
+### Initial Setup and Standard Workflow
 
 ```bash
-cd envs/dev
+cd envs/dev/us-east-1
 terraform init -backend-config="backend.hcl"
-```
-
-> Do not run `terraform init -reconfigure` unless intentionally changing the backend configuration.
-
-### Standard Workflow
-
-```bash
 terraform fmt
 terraform validate
 terraform plan -out=tfplan
-terraform apply tfplan
+terraform apply "tfplan"
+
+cd envs/test/us-east-1
+terraform init -backend-config="backend.hcl"
+terraform fmt
+terraform validate
+terraform plan -out=tfplan
+terraform apply "tfplan"
+
+cd envs/prod/us-east-1
+terraform init -backend-config="backend.hcl"
+terraform fmt
+terraform validate
+terraform plan -out=tfplan
+terraform apply "tfplan"
+
+cd envs/prod/us-west-1
+terraform init -backend-config="backend.hcl"
+terraform fmt
+terraform validate
+terraform plan -out=tfplan
+terraform apply "tfplan"
 ```
 
-To override any `default=false`, add a `-var=enable_*=true` to the `terraform apply`.
+> Optional: run `terraform init -upgrade -backend-config="backend.hcl"` when intentionally upgrading Terraform or providers.
+> Do not run `terraform init -reconfigure` unless intentionally changing the backend configuration per environment or region.
+
+To override any `default = false`, add a `-var=enable_*=true` to the `terraform plan -out=tfplan`.
 
 For example:
 ```bash
-tarraform apply -var="enable_ec2=true"
+cd envs/dev/us-east-1
+terraform init -backend-config="backend.hcl"
+terraform fmt
+terraform validate
+terraform plan -out=tfplan -var="enable_ec2=true"
+terraform apply "tfplan"
 ```
 
-This will allow AWS resources that may not fall within the free-tier to be disabled until ready to capture evidence screenshots. After evidence screenshots are taken, reapplying the `terraform apply` with take the default variable and distroy any resources that were created during the override.
+This allows AWS resources that may not fall within the free tier to be enabled temporarily for evidence screenshots. After evidence screenshots are taken, rerun `terraform plan -out=tfplan` without override variables and then `terraform apply "tfplan"` to restore default values and destroy any resources that were created during the override.
 
 ## Branch Workflow
 
-- All work is performed in feature branches
 - Direct pushes to `main` are restricted
 - Pull requests require approval before merging
 - CI must pass before merges (format, validate, plan)
@@ -129,9 +251,8 @@ This will allow AWS resources that may not fall within the free-tier to be disab
 - [x] Configure GitHub OIDC with IAM
 - [x] Create per-env Terraform folders
 - [x] Begin modular resource build-out (VPC, EC2, ALB, etc.)
-- [ ] Complete core infrastructure (NAT, ASG, RDS)
-- [ ] Add IAM policies, Secrets Manager, VPC endpoints
-- [ ] Implement CloudFront, WAF, and DNS edge controls
-- [ ] Deploy monitoring stack (logs, alarms, dashboards)
+- [x] Complete core infrastructure (NAT, ASG, RDS)
+- [x] Add IAM policies, Secrets Manager, VPC endpoints
+- [x] Implement CloudFront, WAF, and DNS edge controls
+- [x] Deploy monitoring stack (logs, alarms, dashboards)
 - [ ] Final testing, DR, documentation, and teardown readiness
-
