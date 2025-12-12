@@ -338,9 +338,9 @@ module "asg_web" {
   instance_type        = var.web_instance_type
   user_data_base64     = var.user_data_base64
   iam_instance_profile = data.terraform_remote_state.prod_us-east-1_outputs.outputs.web_instance_profile_name
-  desired_capacity     = 0
-  min_size             = 0
-  max_size             = 0
+  desired_capacity     = var.asg_web-desired_capacity
+  min_size             = var.asg_web-min_size
+  max_size             = var.asg_web-max_size
 }
 
 module "asg_app" {
@@ -355,9 +355,9 @@ module "asg_app" {
   instance_type        = var.app_instance_type
   user_data_base64     = var.user_data_base64
   iam_instance_profile = data.terraform_remote_state.prod_us-east-1_outputs.outputs.app_instance_profile_name
-  desired_capacity     = 0
-  min_size             = 0
-  max_size             = 0
+  desired_capacity     = var.asg_app-desired_capacity
+  min_size             = var.asg_app-min_size
+  max_size             = var.asg_app-max_size
 }
 
 module "ec2" {

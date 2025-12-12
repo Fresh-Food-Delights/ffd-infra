@@ -180,6 +180,42 @@ variable "enable_alb_app" {
   default     = false
 }
 
+variable "asg_web-desired_capacity" {
+  description = "Define the ASG Web desired capacity"
+  type        = string
+  default     = "0"
+}
+
+variable "asg_web-min_size" {
+  description = "Define the ASG Web min size"
+  type        = string
+  default     = "0"
+}
+
+variable "asg_web-max_size" {
+  description = "Define the ASG Web max size"
+  type        = string
+  default     = "0"
+}
+
+variable "asg_app-desired_capacity" {
+  description = "Define the ASG App desired capacity"
+  type        = string
+  default     = "0"
+}
+
+variable "asg_app-min_size" {
+  description = "Define the ASG App min size"
+  type        = string
+  default     = "0"
+}
+
+variable "asg_app-max_size" {
+  description = "Define the ASG App max size"
+  type        = string
+  default     = "0"
+}
+
 variable "enable_ec2" {
   description = "Toggle EC2 instance (AMI builder)"
   type        = bool
