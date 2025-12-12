@@ -117,7 +117,7 @@ variable "ec2_instance_type" {
 variable "db_instance_type" {
   description = "Instance type for ASG EC2 instances"
   type        = string
-  default     = "t3.micro"
+  default     = "db.t3.micro"
 }
 
 variable "enable_global_table" {
@@ -134,8 +134,8 @@ variable "replica_regions" {
 
 variable "db_username" {
   type        = string
-  description = "DB username for this environment"
-  default     = "ffd-app-db-master"
+  description = "Master username for RDS"
+  default     = "ffd_app_adm"
 }
 
 variable "multi_az" {

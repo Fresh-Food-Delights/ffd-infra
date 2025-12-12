@@ -410,7 +410,7 @@ module "secrets" {
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = values(module.subnets.private_app_subnet_ids)
   security_group_ids = [module.security_internal.security_group_id]
-  db_username        = "${var.db_username}-${var.environment}"
+  db_username        = "${var.db_username}_${var.environment}"
   enable_rds         = var.enable_rds
 }
 
@@ -425,7 +425,7 @@ module "rds" {
   multi_az              = var.multi_az
   is_replica            = var.is_replica
 
-  db_username = "${var.db_username}-${var.environment}"
+  db_username = "${var.db_username}_${var.environment}"
   enable      = var.enable_rds
 }
 

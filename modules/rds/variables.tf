@@ -36,7 +36,7 @@ variable "db_security_group_ids" {
 variable "db_username" {
   type        = string
   description = "Master DB username"
-  default = "ffd-app-db-master"
+  default = "ffd_app_adm"
 }
 
 variable "multi_az" {
