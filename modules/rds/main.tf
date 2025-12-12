@@ -30,7 +30,7 @@ resource "aws_db_instance" "primary" {
   allocated_storage = 20
   storage_type      = "gp3"
   db_name  = "ffd_app_db"
-  username = "${var.db_username}-${var.environment}"
+  username = "${var.db_username}_${var.environment}"
   manage_master_user_password = true
   multi_az                 = var.multi_az
   storage_encrypted        = true
